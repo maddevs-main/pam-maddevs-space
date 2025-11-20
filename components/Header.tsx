@@ -45,11 +45,12 @@ const LogoImg = styled.img`
   display: inline-block;
 `;
 
-export default function Header({ title }: { title?: string }) {
-  const [user, setUser] = useState<any | null>(null);
+export default function Header({ title, initialUser }: { title?: string; initialUser?: any }) {
+  const [user, setUser] = useState<any | null>(initialUser || null);
   const router = useRouter();
-
   useEffect(() => {
+    // If initialUser was provided from the server, skip client fetch.
+    if (initialUser) return;
     let mounted = true;
     async function fetchMe() {
       try {
@@ -64,7 +65,7 @@ export default function Header({ title }: { title?: string }) {
     }
     fetchMe();
     return () => { mounted = false; };
-  }, []);
+  }, [initialUser]);
 
   async function handleLogout() {
     try {

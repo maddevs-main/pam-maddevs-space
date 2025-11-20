@@ -1,34 +1,22 @@
-"use client";
-import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import DashboardShell from '../../components/vendor/DashboardShell';
-import { useRouter } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { verifyToken } from '../../lib/jwt';
+import { redirect } from 'next/navigation';
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const cookieStore = cookies();
+  const token = cookieStore.get('pam_token')?.value || null;
+  if (!token) redirect('/auth/login');
+  const payload = verifyToken(token as string);
+  if (!payload) redirect('/auth/login');
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (!mounted) return;
-        if (!res.ok) { router.push('/auth/login'); return; }
-        // no role gating here — staff pages will render inside the same shell
-        await res.json().catch(()=>({}));
-      } catch (e) { router.push('/auth/login'); }
-      finally { if (mounted) setLoading(false); }
-    }
-    load();
-    return () => { mounted = false; };
-  }, [router]);
-
-  if (loading) return <div style={{ padding: 16 }}>Checking authentication...</div>;
+  const initialUser = { id: payload.userId, role: payload.role, tenantId: payload.tenantId };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header title="maddevs" />
+      {/* @ts-expect-error Server -> Client prop (serializable) */}
+      <Header title="maddevs" initialUser={initialUser} />
       <DashboardShell>
         {children}
       </DashboardShell>

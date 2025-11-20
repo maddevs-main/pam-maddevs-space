@@ -1,44 +1,23 @@
-"use client";
-import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import DashboardShell from '../../components/vendor/DashboardShell';
-import { useRouter } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { verifyToken } from '../../lib/jwt';
+import { redirect } from 'next/navigation';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const cookieStore = cookies();
+  const token = cookieStore.get('pam_token')?.value || null;
+  if (!token) redirect('/auth/login');
+  const payload = verifyToken(token as string);
+  if (!payload) redirect('/auth/login');
+  if (payload.role !== 'admin') redirect('/dashboard');
 
-  useEffect(() => {
-    let mounted = true;
-    async function check() {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (!mounted) return;
-        if (!res.ok) {
-          router.push('/auth/login');
-          return;
-        }
-        const data = await res.json();
-        if (data?.user?.role !== 'admin') {
-          // not an admin, redirect to normal dashboard
-          router.push('/dashboard');
-          return;
-        }
-      } catch (err) {
-        router.push('/auth/login');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-    check();
-    return () => { mounted = false; };
-  }, [router]);
-
-  if (loading) return <div style={{ padding: 16 }}>Checking permissions...</div>;
+  const initialUser = { id: payload.userId, role: payload.role, tenantId: payload.tenantId };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header title="PAM — Admin" />
+      {/* @ts-expect-error Server -> Client prop (serializable) */}
+      <Header title="PAM — Admin" initialUser={initialUser} />
       <DashboardShell>
         {children}
       </DashboardShell>

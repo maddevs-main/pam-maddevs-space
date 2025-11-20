@@ -2,6 +2,7 @@ import PageShell from '../../components/PageShell';
 import DashboardStats from '../../components/DashboardStats';
 import CalendarAction from '../../components/CalendarAction';
 import DashboardGreeting from '../../components/DashboardGreeting';
+import { redirect } from 'next/navigation';
 
 async function fetchJson(path: string) {
   try {
@@ -20,6 +21,10 @@ export default async function DashboardPage() {
   ]);
 
   const user = userRes?.user || null;
+  if (!user) {
+    // Server-side redirect for unauthenticated visitors to avoid UI flash
+    redirect('/auth/login');
+  }
   // projects API returns { projects: [...] }
   const projects = projectsRes?.projects || [];
   const meetings = meetingsRes?.meetings || [];

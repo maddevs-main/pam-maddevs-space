@@ -254,7 +254,7 @@ function Donut({ pct=0, size=150, stroke=14, color=RGB_FINANCE_GREEN }:{pct?:num
 }
 
 export default function DashboardStats({ data }:{ data?: any }) {
-  // client-side tasks state: use server-provided list if available, otherwise fetch client-side
+  // client-side projects state: use server-provided list if available, otherwise fetch client-side
   const [projectsListState, setProjectsListState] = React.useState<any[]>(data?.projects?.list || []);
   const projectsList: any[] = projectsListState;
 
@@ -264,7 +264,7 @@ export default function DashboardStats({ data }:{ data?: any }) {
     let mounted = true;
     async function load() {
       try {
-        // consumer dashboard should query projects (not tasks)
+          // consumer dashboard should query projects (not tasks)
         const [projRes, userRes] = await Promise.all([fetch('/api/projects'), fetch('/api/users/me')]);
         let projectsData: any[] = [];
         let userData: any = null;
@@ -371,7 +371,7 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
   // card layout positions (matching the supplied sample); values change by role
   const cardLayout = isAdmin ? [
-    { key: 'activeProjects', left: 40, top: 42, bg: 'rgba(4,34,90,0.60)', label: 'ACTIVE TASKS', value: `${activeProjects}` },
+    { key: 'activeProjects', left: 40, top: 42, bg: 'rgba(4,34,90,0.60)', label: 'ACTIVE PROJECTS', value: `${activeProjects}` },
     { key: 'totalPending', left: 323, top: 42, bg: 'rgba(22,86,22,0.30)', label: 'TOTAL PENDING', value: `$${amountPending.toLocaleString()}` },
     { key: 'upcoming', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'UPCOMING MEETINGS', value: `${meetings.length}` },
     { key: 'milestones', left: 323, top: 161, bg: 'rgba(255,0,0,0.12)', label: 'ACTIVE MILESTONES', value: `${activeMilestones}` },
@@ -379,8 +379,8 @@ export default function DashboardStats({ data }:{ data?: any }) {
   ] : [
     // consumer view
     // replace the top card value with the selected project's avg and name
-    { key: 'topAvg', left: 323, top: 42, bg: 'rgba(255,0,0,0.26)', label: selectedProject ? 'SELECTED TASK AVG' : 'TOP TASK AVG', value: `${selectedProject ? (selectedProject.stages && selectedProject.stages.length ? Math.round(selectedProject.stages.reduce((a:any,b:any)=>a+Number(b.progress||0),0)/selectedProject.stages.length) : 0) : topProjectAvg}%`, sub: selectedProject ? (selectedProject.title || topProjectName) : topProjectName },
-    { key: 'liveProjects', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'LIVE TASKS', value: `${activeProjects}`, sub: activeProjectName },
+    { key: 'topAvg', left: 323, top: 42, bg: 'rgba(255,0,0,0.26)', label: selectedProject ? 'SELECTED PROJECT AVG' : 'TOP PROJECT AVG', value: `${selectedProject ? (selectedProject.stages && selectedProject.stages.length ? Math.round(selectedProject.stages.reduce((a:any,b:any)=>a+Number(b.progress||0),0)/selectedProject.stages.length) : 0) : topProjectAvg}%`, sub: selectedProject ? (selectedProject.title || topProjectName) : topProjectName },
+    { key: 'liveProjects', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'LIVE PROJECTS', value: `${activeProjects}`, sub: activeProjectName },
     { key: 'upcoming', left: 323, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'UPCOMING MEETINGS', value: `${meetings.length}` },
     { key: 'milestones', left: 40, top: 282, bg: 'rgba(22,86,22,0.30)', label: 'ACTIVE MILESTONES', value: `${activeMilestones}`, sub: activeProjectName },
     { key: 'pending', left: 323, top: 282, bg: 'rgba(22,86,22,0.30)', label: 'AMOUNT PENDING', value: `$${amountPending.toLocaleString()}` },
@@ -425,8 +425,8 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
               {/* Active projects mini list */}
               <div style={{ marginTop: 12 }}>
-                <h4 style={{ margin: '8px 0', color: '#f8f8f8', fontSize: 14 }}>Active Tasks</h4>
-                {activeProjectsList.length === 0 ? <Small>No active tasks</Small> : (
+                <h4 style={{ margin: '8px 0', color: '#f8f8f8', fontSize: 14 }}>Active Projects</h4>
+                {activeProjectsList.length === 0 ? <Small>No active projects</Small> : (
                   <div style={{ display: 'grid', gap: 8, marginTop: 6 }}>
                     {activeProjectsList.map((p:any) => {
                       const pid = String(p._id || p.id);
@@ -450,11 +450,11 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
       {/* Projects details card spanning three columns on wide screens */}
       <Card style={{ gridColumn: 'span 3', padding: '22px' }}>
-        <h3 style={{ margin: 0, color: '#f8f8f8' }}>Tasks</h3>
+        <h3 style={{ margin: 0, color: '#f8f8f8' }}>Projects</h3>
         <Small style={{ marginTop: 6, fontSize: 14 }}>Stages & progress</Small>
         <div style={{ height: 12 }} />
           <div style={{ marginBottom: 12 }}>
-          <Small>Top task avg</Small>
+          <Small>Top project avg</Small>
           <div style={{ height: 8 }} />
           <Bar style={{ height: 18 }}><BarFill w={topProjectAvg} color={RGB_STAGE_TOP_GREEN} /></Bar>
         </div>
