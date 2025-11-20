@@ -62,7 +62,7 @@ export default function TaskDetailPage() {
         <div>
           <h3>Details</h3>
           <p><strong>Assigned to:</strong> {Array.isArray(task.people_allocated) ? task.people_allocated.join(', ') : (task.people_allocated || '—')}</p>
-          <p><strong>Progress:</strong> {task.progress ?? task.stages?.reduce((s:any,n:any)=>s+(Number(n.progress)||0),0)/Math.max(1,(task.stages||[]).length) || 0}%</p>
+          <p><strong>Progress:</strong> {(task.progress ?? (task.stages?.reduce((s:any,n:any)=>s+(Number(n.progress)||0),0)/Math.max(1,(task.stages||[]).length))) || 0}%</p>
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <Button onClick={() => router.back()}>Back</Button>
             {/* Show Add Link button if user is admin, the task author (consumer), or assigned staff */}

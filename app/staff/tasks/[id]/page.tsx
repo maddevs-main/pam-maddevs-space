@@ -316,13 +316,6 @@ export default function StaffTaskDetails({ params }: { params: { id: string } })
   );
 }
 
-// Render the add-link dialog within the page component via portal-like helper
-// (this call is harmless when dialog is not visible)
-/* eslint-disable react/jsx-no-bind */
-export function StaffTaskAddDialogProxy(props: any) {
-  return <AddLinkDialog {...props} />;
-}
-
 
 // The add-link dialog UI (rendered conditionally)
 function AddLinkDialog({ visible, onClose, field, setField, link, setLink, taskId, onAdded }: any) {
