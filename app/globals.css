@@ -1,26 +1,55 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	/* Palette provided by user */
+	--color-yes: #77a577; /* positive / approved */
+	--color-pending: #CFCD88; /* pending / warning */
+	--color-no: #865555; /* negative / decline */
+	--color-dark: #246a24; /* neutral / dark */
+
+	/* Expose rgba fallbacks if needed */
+	--color-yes-rgb: 82, 100, 82;
+	--color-pending-rgb: 207, 205, 136;
+	--color-no-rgb: 134, 85, 85;
+	--color-dark-rgb: 61, 64, 76;
+
+	/* Tile / list item backgrounds (default: white at 10% opacity) */
+	/* Tile background: white at 10% opacity (final desired) */
+	--tile-bg: rgba(255, 255, 255, 0.728);
+
+	/* Card background (defaults to tile bg so cards follow same look) */
+	--card-bg: var(--tile-bg);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Utility examples (use where appropriate) */
+.text-yes { color: var(--color-yes); }
+.bg-yes { background-color: var(--color-yes); }
+.text-pending { color: var(--color-pending); }
+.bg-pending { background-color: var(--color-pending); }
+.text-no { color: var(--color-no); }
+.bg-no { background-color: var(--color-no); }
+.text-dark { color: var(--color-dark); }
+.bg-dark { background-color: var(--color-dark); }
+
+/* Use `rgba(var(--color-yes-rgb), 0.1)` when semi-transparent colors are required. */
+
+/* Dialog-like panel utilities (for non-modal dialog appearance) */
+:root {
+	--dialog-border: rgba(var(--color-dark-rgb), 0.10);
+	--dialog-shadow: 0 8px 28px rgba(var(--color-dark-rgb), 0.12);
+	--dialog-radius: 12px;
+	--dialog-padding: 20px;
+	--dialog-input-border: rgba(180,180,178,0.12);
+	--dialog-input-focus: rgba(var(--color-yes-rgb), 0.18);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dialog-panel {
+	background: var(--card-bg);
+	border: 1px solid var(--dialog-border);
+	box-shadow: var(--dialog-shadow);
+	border-radius: var(--dialog-radius);
+	padding: var(--dialog-padding);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+.dialog-stack { display: grid; gap: 12px; }
+
+.dialog-input { border: 1px solid var(--dialog-input-border); border-radius: 8px; padding: 8px 10px; background: transparent; color: inherit; }
+.dialog-input:focus { outline: 2px solid var(--dialog-input-focus); }
