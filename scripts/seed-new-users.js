@@ -17,7 +17,7 @@ if (fs.existsSync(envPath)) {
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/maddevs';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function seed() {
   const client = new MongoClient(MONGODB_URI);

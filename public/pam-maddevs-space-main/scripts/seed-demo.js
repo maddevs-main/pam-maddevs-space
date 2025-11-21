@@ -34,7 +34,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
   console.error('Error: MONGODB_URI environment variable not set.');
   console.error('Please create a .env.local file and add the following line:');
-  console.error('MONGODB_URI=mongodb://localhost:27017/pam');
+  console.error('MONGODB_URI must be set to your live cluster URI.');
   process.exit(1);
 }
 

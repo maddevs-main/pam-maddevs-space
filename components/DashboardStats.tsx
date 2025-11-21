@@ -512,19 +512,15 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
       
 
-      {/* Finance donut card spanning one column */}
-      <CenterCard>
+      {/* Finance stats card spanning one column */}
+      <MetricCard>
         <h3 style={{ margin: 0, color: '#f8f8f8' }}>Finance</h3>
-        <Small style={{ marginTop: 6 }}>Overview</Small>
-        <div style={{ height: 12 }} />
-        <RadialWrap>
-            <Donut pct={pct} size={RADIAL_SIZE} stroke={RADIAL_STROKE} color={RGB_FINANCE_GREEN} />
-          <RadialInner>
-            <div style={{ fontSize: 18, color: '#f8f8f8' }}>{pct}%</div>
-            <Small style={{ marginTop: 6, color: '#f8f8f8' }}>${paid.toLocaleString()}</Small>
-          </RadialInner>
-        </RadialWrap>
-      </CenterCard>
+        <MetricLabel>Total Received</MetricLabel>
+        <BigNumber>${paid.toLocaleString()}</BigNumber>
+        <MetricLabel style={{ marginTop: 12 }}>Total Pending</MetricLabel>
+        <BigNumber style={{ color: '#eab308' }}>${pending.toLocaleString()}</BigNumber>
+        <MetricSub style={{ marginTop: 10 }}>You have received {pct}% of your total</MetricSub>
+      </MetricCard>
       
     </Grid>
     </>
