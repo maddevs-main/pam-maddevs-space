@@ -39,7 +39,7 @@ const Container = styled.div`
 
 const Card = styled.div`
   padding: 2rem;
-  background-color: #f9fafb;
+  background-color: #d8c0a7ff;
   border-radius: 0.375rem;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   position: relative;
@@ -158,7 +158,7 @@ const FooterLink = styled.span`
 const InputWrapper = styled.div` position: relative; `;
 const InputIcon = styled.span` position: absolute; top: 0; bottom: 0; left: 0; display:flex; align-items:center; padding-left:0.75rem; `;
 const StyledInputBase = styled.input`
-  display:block; width:100%; padding-top:0.75rem; padding-bottom:0.75rem; padding-right:1rem; color:#111827; background:#fff; border:1px solid #d1d5db; border-radius:0.375rem; box-shadow:0 1px 2px 0 rgb(0 0 0 /0.05); font-size:0.875rem; line-height:1.25rem;
+  display:block; width:100%; padding-top:0.75rem; padding-bottom:0.75rem; padding-right:1rem; color:#111827; background:#f5ede6; border:1px solid #d1d5db; border-radius:0.375rem; box-shadow:0 1px 2px 0 rgb(0 0 0 /0.05); font-size:0.875rem; line-height:1.25rem;
   &::placeholder { color:#6b7280; }
   &:focus { outline:none; box-shadow:0 0 0 2px #44403c; border-color:#44403c; }
 `;

@@ -8,6 +8,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="theme-color" content="#1A1A1A" />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

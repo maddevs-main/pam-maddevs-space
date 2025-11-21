@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import React from 'react';
 
 export const TextInput = styled.input`
-  background: transparent;
+  background: #f5ede6;
   color: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.light) || '#F1F1F1'};
   border: 1px solid var(--dialog-input-border, rgba(180,180,178,0.08));
   padding: 8px 10px;
@@ -13,7 +13,7 @@ export const TextInput = styled.input`
 `;
 
 export const TextArea = styled.textarea`
-  background: transparent;
+  background: #f5ede6;
   color: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.light) || '#F1F1F1'};
   border: 1px solid var(--dialog-input-border, rgba(180,180,178,0.08));
   padding: 8px 10px;

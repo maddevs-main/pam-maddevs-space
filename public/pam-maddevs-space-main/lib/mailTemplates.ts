@@ -1,6 +1,6 @@
 // Legacy-compatible mail template helpers ported from public/maddevs-space
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-const LOGO_URL = BASE_URL + '/assets/media/logo-main.png';
+const LOGO_URL = BASE_URL + '/favicon.svg';
 const MAIL_TOP_URL = BASE_URL + '/assets/media/mail-top.png';
 
 function meetingCredentialsTable(data: any, showMeetingLink = true) {

@@ -38,7 +38,7 @@ const Container = styled.div`
 
 const Card = styled.div`
   padding: 2rem;
-  background-color: #f9fafb;
+  background-color: #d8c0a7ff;
   border-radius: 0.375rem;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
     0 8px 10px -6px rgb(0 0 0 / 0.1);
@@ -167,7 +167,7 @@ const StyledInputBase = styled.input`
   padding-bottom: 0.75rem;
   padding-right: 1rem;
   color: #111827;
-  background-color: #fff;
+  background-color: #f5ede6;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -433,6 +433,11 @@ export default function RegisterPage() {
                   <Link href="/auth/login">
                     <FooterLink>Sign in</FooterLink>
                   </Link>
+                  <div style={{marginTop: '0.5rem', fontSize: '0.95em'}}>
+                    <a href="https://maddevs.space/onboard" target="_blank" rel="noopener" style={{color: '#786143', textDecoration: 'underline', fontWeight: 500}}>
+           Use this link to begin discovery and receive your exclusive invite code.
+                    </a>
+                  </div>
                 </FooterNote>
               </FieldWrapper>
               </Form>
