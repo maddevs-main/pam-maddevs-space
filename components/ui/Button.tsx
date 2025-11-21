@@ -15,10 +15,21 @@ const Btn = styled.button`
   align-items: center;
   gap: 8px;
   transition: all 160ms ease;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
   &:active { transform: translateY(0); }
   &:focus-visible { outline: 2px solid rgba(241,241,241,0.06); outline-offset: 2px; }
+
+  @media (max-width: 600px) {
+    font-size: 13px;
+    padding: 5px 7px;
+    gap: 6px;
+  }
 `;
 
 export default function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {

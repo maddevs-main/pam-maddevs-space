@@ -19,24 +19,32 @@ const Container = styled.div`
   overflow: hidden;
   transition: all 200ms ease;
   width: 100%;
+  min-width: 0;
 `;
 
 const Shell = styled.div`
   display: grid;
-  /* left content grows, right status column has a reasonable min/max width */
   grid-template-columns: 1fr minmax(80px, 120px);
   border-radius: 12px;
   overflow: hidden;
+  min-width: 0;
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr 70px;
+  }
 `;
 
 const Left = styled.div`
-  background: #ffffff39; /* lighter grey tile */
+  background: #ffffff39;
   padding: 12px 14px;
   display: block;
   box-sizing: border-box;
-  /* never allow inner scrollbars; truncate overflowing content instead */
   overflow: hidden;
   border-right: 1px solid rgba(255,255,255,0.04);
+  width: 100%;
+  min-width: 0;
+  @media (max-width: 800px) {
+    padding: 6px 8px;
+  }
 `;
 
 const Right = styled.div<{ $shellBg?: string }>`
@@ -47,23 +55,40 @@ const Right = styled.div<{ $shellBg?: string }>`
   padding: 8px;
   box-sizing: border-box;
   min-width: 80px;
+  @media (max-width: 800px) {
+    min-width: 60px;
+    padding: 4px;
+  }
 `;
 
 const Inner = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
   @media(min-width: 640px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+  @media (max-width: 800px) {
+    gap: 4px;
   }
 `;
 
 const MainInfo = styled.div`
   flex: 1 1 auto;
   margin-bottom: 8px;
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   @media(min-width: 640px) { margin-bottom: 0; }
+  @media (max-width: 800px) {
+    margin-bottom: 0;
+  }
 `;
 
 const Title = styled.h3`
@@ -74,6 +99,10 @@ const Title = styled.h3`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  @media (max-width: 800px) {
+    font-size: 0.95rem;
+  }
 `;
 
 const MetaRow = styled.div`

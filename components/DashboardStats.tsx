@@ -8,9 +8,15 @@ const Grid = styled.div`
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 
-  @media (max-width: 980px) {
+  @media (max-width: 1280px) {
     grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 `;
 
@@ -22,14 +28,19 @@ const Frame = styled.div`
   margin-bottom: 18px;
   padding: 20px 28px;
   min-height: 420px;
+  width: 100%;
+  box-sizing: border-box;
 
   @media (min-width: 1280px) {
-    min-height: 520px; /* larger frame on wide screens to fill space */
+    min-height: 520px;
   }
-
   @media (max-width: 980px) {
     padding: 14px;
-    min-height: 480px; /* stacked cards will fit within this */
+    min-height: 380px;
+  }
+  @media (max-width: 800px) {
+    padding: 10px 6px;
+    min-height: 260px;
   }
 `;
 
@@ -38,23 +49,34 @@ const CardsWrap = styled.div`
   grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: ${160}px;
   gap: 18px;
+  width: 100%;
+  box-sizing: border-box;
 
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
     grid-auto-rows: ${160}px;
     gap: 12px;
   }
+  @media (max-width: 800px) {
+    grid-auto-rows: 120px;
+    gap: 8px;
+  }
 `;
 
 const FrameGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 360px; /* left: cards, right: meetings */
+  grid-template-columns: 1fr 360px;
   gap: 18px;
   align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 
-  @media (max-width: 980px) {
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr 260px;
+  }
+  @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 `;
 
@@ -63,11 +85,17 @@ const CardsGrid = styled.div`
   grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: ${160}px;
   gap: 18px;
+  width: 100%;
+  box-sizing: border-box;
 
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
     grid-auto-rows: ${160}px;
     gap: 12px;
+  }
+  @media (max-width: 800px) {
+    grid-auto-rows: 110px;
+    gap: 8px;
   }
 `;
 
@@ -86,16 +114,22 @@ const RGB_STAGE_TOP_GREEN = PROJECT_ACTION_GREEN;
 const MeetingsBox = styled.div`
   width: 100%;
   height: 100%;
-  min-height: ${CARD_HEIGHT * 2 + 18}px; /* ensure it visually matches two rows of cards */
+  min-height: ${CARD_HEIGHT * 2 + 18}px;
   background: rgba(44, 44, 44, 1);
   border-radius: 12px;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  box-sizing: border-box;
 
   @media (max-width: 980px) {
     min-height: ${CARD_HEIGHT}px;
+    padding: 10px 8px;
+  }
+  @media (max-width: 800px) {
+    min-height: 80px;
+    padding: 6px 4px;
   }
 `;
 
@@ -109,12 +143,17 @@ const SmallCard = styled.div< { bg:string } >`
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* center content vertically for uniform look */
+  justify-content: center;
   align-items: flex-start;
+  box-sizing: border-box;
 
   @media (max-width: 980px) {
-    height: ${CARD_HEIGHT}px; /* keep fixed height on mobile */
-    padding: 10px 12px;
+    height: ${CARD_HEIGHT}px;
+    padding: 10px 8px;
+  }
+  @media (max-width: 800px) {
+    height: 90px;
+    padding: 6px 4px;
   }
 `;
 
@@ -131,13 +170,15 @@ const CardBig = styled.div`
   color: #ffffff;
   font-weight: 800;
   line-height: 1;
-  /* larger unified size to fill the frame visually */
-  font-size: clamp(26px, 5.8vw, 56px);
+  font-size: clamp(22px, 5vw, 48px);
   margin-top: 6px;
   position: relative;
 
   @media (max-width: 980px) {
-    font-size: clamp(20px, 6vw, 28px);
+    font-size: clamp(16px, 6vw, 22px);
+  }
+  @media (max-width: 800px) {
+    font-size: 16px;
   }
 `;
 
@@ -156,13 +197,24 @@ const MetricCard = styled(Card)`
   justify-content: center;
   padding: 18px;
   min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 800px) {
+    padding: 10px 6px;
+    min-height: 80px;
+  }
 `;
 
 const BigNumber = styled.div`
   font-size: 44px;
   font-weight: 900;
   line-height: 1;
-  color: #f8f8f8; /* off-white numbers */
+  color: #f8f8f8;
+  word-break: break-word;
+  @media (max-width: 800px) {
+    font-size: 22px;
+  }
 `;
 
 const MetricLabel = styled.div`

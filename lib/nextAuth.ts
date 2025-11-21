@@ -28,16 +28,22 @@ export const authOptions = {
       }
     })
   ],
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 6 * 24 * 60 * 60, // 6 days
+    updateAge: 24 * 60 * 60,  // Refresh session every 24 hours
+  },
   jwt: { /* use default */ },
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev_nextauth_secret',
   callbacks: {
     async jwt({ token, user }) {
-      // On sign in, user will be present
+      // Always sync user fields on sign in or token refresh
       if (user) {
         token.userId = (user as any).id;
         token.role = (user as any).role;
         token.tenantId = (user as any).tenantId;
+        token.email = (user as any).email;
+        token.name = (user as any).name;
       }
       return token;
     },
@@ -46,6 +52,8 @@ export const authOptions = {
         (session.user as any).id = (token as any).userId;
         (session.user as any).role = (token as any).role;
         (session.user as any).tenantId = (token as any).tenantId;
+        (session.user as any).email = (token as any).email;
+        (session.user as any).name = (token as any).name;
       }
       return session;
     }

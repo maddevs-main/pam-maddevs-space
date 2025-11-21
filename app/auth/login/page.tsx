@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from 'react';
 import Header from '../../../components/Header';
+import dynamic from 'next/dynamic';
+const LoadingScreen = dynamic(() => import('../../../components/LoadingScreen'), { ssr: false });
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
@@ -266,6 +268,7 @@ export default function LoginPage() {
 
   return (
     <>
+      {loading && <LoadingScreen />}
       <Header title="maddevs" />
       <GlobalStyle />
       <Background>
@@ -314,7 +317,7 @@ export default function LoginPage() {
               )}
 
               <FieldWrapper>
-                <SubmitButton type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</SubmitButton>
+                <SubmitButton type="submit" disabled={loading}>{'Sign In'}</SubmitButton>
               </FieldWrapper>
 
               <FieldWrapper>

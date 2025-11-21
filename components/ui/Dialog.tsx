@@ -17,15 +17,28 @@ const Panel = styled.div<{ $panelColor?: string; $borderColor?: string }>`
   background: ${p => p.$panelColor || 'rgba(5,5,5,0.80)'};
   border-radius: 15px;
   width: 720px;
-  max-width: calc(100% - 48px);
+  max-width: calc(100vw - 24px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-  /* subtle darker grey border for better separation against the blurred backdrop */
   border: 1px solid ${p => p.$borderColor || 'rgba(0,0,0,0.35)'};
   display: flex;
   flex-direction: column;
-  /* keep dialog within viewport and allow internal scrolling */
   max-height: 90vh;
   overflow: hidden;
+  box-sizing: border-box;
+
+  @media (max-width: 900px) {
+    width: 98vw;
+    max-width: 98vw;
+    min-width: 0;
+    border-radius: 10px;
+  }
+  @media (max-width: 600px) {
+    width: 100vw;
+    max-width: 100vw;
+    min-width: 0;
+    border-radius: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
 `;
 
 const Header = styled.div`
@@ -33,6 +46,10 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-width: 0;
+  @media (max-width: 600px) {
+    padding: 12px 10px;
+  }
 `;
 
 const Title = styled.h3`
@@ -61,8 +78,8 @@ const Body = styled.div`
   font-size: 15px;
   overflow: auto;
   flex: 1 1 auto;
+  min-width: 0;
 
-  /* style inputs inside dialogs to match the design sample */
   input, textarea, select {
     background: #2f2f2f;
     border-radius: 8px;
@@ -78,9 +95,9 @@ const Body = styled.div`
 
   label { display: block; margin-bottom: 6px; color: #b3b3b3; font-weight: 500; }
 
-  /* ensure long forms can be scrolled on small screens */
-  @media (max-width: 520px) {
-    padding: 12px 14px 16px 14px;
+  @media (max-width: 600px) {
+    padding: 10px 6px 14px 6px;
+    font-size: 14px;
   }
 `;
 
@@ -90,6 +107,12 @@ const Footer = styled.div`
   gap: 12px;
   justify-content: flex-end;
   flex-shrink: 0;
+  min-width: 0;
+  @media (max-width: 600px) {
+    padding: 10px 6px 14px 6px;
+    flex-direction: column;
+    gap: 8px;
+  }
 `;
 
 export default function Dialog({ title, children, footer, onClose, panelColor, borderColor }:{ title?: string, children?: React.ReactNode, footer?: React.ReactNode, onClose?: ()=>void, panelColor?: string, borderColor?: string }) {

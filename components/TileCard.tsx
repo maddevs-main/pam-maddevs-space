@@ -21,11 +21,18 @@ const Container = styled.div`
   transition: all 200ms ease;
   width: 100%;
   box-sizing: border-box;
-  /* fixed height to keep all cards identical in shape (reduced to be more compact) */
   height: 110px;
   min-height: 110px;
   max-height: 110px;
+  display: flex;
+  min-width: 0;
   &:focus-visible { outline: 3px solid rgba(98, 99, 175, 0.18); outline-offset: 3px; }
+
+  @media (max-width: 800px) {
+    height: 80px;
+    min-height: 80px;
+    max-height: 80px;
+  }
 `;
 
 const Shell = styled.div`
@@ -34,6 +41,12 @@ const Shell = styled.div`
   border-radius: 12px;
   overflow: hidden;
   height: 100%;
+  width: 100%;
+  min-width: 0;
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr 70px;
+  }
 `;
 
 const Left = styled.div`
@@ -41,9 +54,14 @@ const Left = styled.div`
   padding: 10px 12px;
   display: block;
   box-sizing: border-box;
-  /* never allow inner scrollbars; truncate overflowing content instead */
   overflow: hidden;
   border-right: 1px solid rgba(255,255,255,0.04);
+  width: 100%;
+  min-width: 0;
+
+  @media (max-width: 800px) {
+    padding: 6px 8px;
+  }
 `;
 
 const Right = styled.div<{ $shellBg?: string }>`
@@ -55,25 +73,41 @@ const Right = styled.div<{ $shellBg?: string }>`
   box-sizing: border-box;
   min-width: 80px;
   height: 100%;
+
+  @media (max-width: 800px) {
+    min-width: 60px;
+    padding: 4px;
+  }
 `;
 
 const Inner = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
   @media(min-width: 640px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+  @media (max-width: 800px) {
+    gap: 4px;
   }
 `;
 
 const MainInfo = styled.div`
   flex: 1 1 auto;
   margin-bottom: 8px;
-  @media(min-width: 640px) { margin-bottom: 0; }
-  /* ensure long inner content doesn't push the card out of shape */
   overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  @media(min-width: 640px) { margin-bottom: 0; }
+  @media (max-width: 800px) {
+    margin-bottom: 0;
+  }
 `;
 
 const Title = styled.h3`
@@ -81,11 +115,15 @@ const Title = styled.h3`
   font-size: 1.125rem;
   font-weight: 600;
   color: #ffffff;
-  /* add a small left offset so top-left beacon doesn't overlap the title */
   margin-left: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  @media (max-width: 800px) {
+    font-size: 0.95rem;
+    margin-left: 6px;
+  }
 `;
 
 const MetaRow = styled.div`
@@ -117,6 +155,7 @@ const StatusText = styled.span<{ $textColor?: string }>`
   padding: 0 6px;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
 `;
 
 export function statusColors(status?: string) {
