@@ -49,25 +49,24 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev_nextauth_secret',
   callbacks: {
     async jwt({ token, user }) {
-      // Always sync user fields on sign in or token refresh
+      // On sign-in, copy user properties to the token.
       if (user) {
-        token.id = (user as any).id;
-        token.userId = (user as any).id;
+        token.id = user.id;
         token.role = (user as any).role;
         token.tenantId = (user as any).tenantId;
-        token.email = (user as any).email;
-        token.name = (user as any).name;
+        token.name = user.name;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
+      // Copy properties from token to session.
       if (session.user) {
-        session.user.id = token.id;
-        (session.user as any).id = (token as any).userId;
-        (session.user as any).role = (token as any).role;
-        (session.user as any).tenantId = (token as any).tenantId;
-        (session.user as any).email = (token as any).email;
-        (session.user as any).name = (token as any).name;
+        session.user.id = token.id as string;
+        (session.user as any).role = token.role;
+        (session.user as any).tenantId = token.tenantId;
+        session.user.name = token.name;
+        session.user.email = token.email;
       }
       return session;
     }
