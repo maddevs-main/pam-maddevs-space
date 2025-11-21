@@ -11,10 +11,22 @@ export const TextInput = styled.input`
   font-size: 16px;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  white-space: pre-line;
+  line-height: 1.2;
   &:focus-visible { outline: 2px solid var(--dialog-input-focus, rgba(241,241,241,0.08)); }
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
     font-size: 15px;
     padding: 7px 8px;
+  }
+  @media (max-width: 600px) {
+    font-size: 14px;
+    padding: 6px 6px;
+    line-height: 1.1;
   }
 `;
 
@@ -28,11 +40,25 @@ export const TextArea = styled.textarea`
   min-height: 100px;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  white-space: pre-line;
+  line-height: 1.2;
+  resize: vertical;
   &:focus-visible { outline: 2px solid var(--dialog-input-focus, rgba(241,241,241,0.08)); }
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
     font-size: 15px;
     padding: 7px 8px;
     min-height: 80px;
+  }
+  @media (max-width: 600px) {
+    font-size: 14px;
+    padding: 6px 6px;
+    min-height: 60px;
+    line-height: 1.1;
   }
 `;
 

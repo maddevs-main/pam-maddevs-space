@@ -12,6 +12,9 @@ export default function DashboardFinancePage() {
   const [loading, setLoading] = React.useState(true);
   const [selectedProject, setSelectedProject] = React.useState<any | null>(null);
   const [currentUser, setCurrentUser] = React.useState<any | null>(null);
+  const [viewMode, setViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
+  const [page, setPage] = React.useState(1);
+  const PAGE_SIZE = 10;
 
   React.useEffect(()=>{ load(); }, []);
 
@@ -138,66 +141,103 @@ export default function DashboardFinancePage() {
     }
 
     return (
-      <PageShell title="Finance" subtitle="Project financials." actions={<CalendarAction items={calItems} title="Finance calendar" />}>
+      <PageShell title="Finance" subtitle="Project financials." actions={<CalendarAction items={calItems} title="Finance calendar" />}> 
         <div>
-    
-      {tasks.length === 0 && <p>No tasks</p>}
-      {tasks.length > 0 && (
-        <div>
-          {/* If current user is staff, show aggregated finance summary */}
-          {totalsJSX}
+          {/* View/sort buttons */}
+          <div style={{ margin: '12px 0', display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Button onClick={() => { setViewMode('all'); setPage(1); }} style={{ background: viewMode==='all' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>All</Button>
+            <Button onClick={() => { setViewMode('active'); setPage(1); }} style={{ background: viewMode==='active' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Active</Button>
+            <Button onClick={() => { setViewMode('completed'); setPage(1); }} style={{ background: viewMode==='completed' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Completed</Button>
+            <Button onClick={() => { setViewMode('inactive'); setPage(1); }} style={{ background: viewMode==='inactive' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Inactive</Button>
+          </div>
 
-          <div style={{ display: 'grid', gap: 12 }}>
-          {tasks.map(p => {
-            const now = new Date();
-            const start = p.timeline?.from ? new Date(p.timeline.from) : null;
-            const end = p.timeline?.to ? new Date(p.timeline.to) : null;
-            const active = start && (!end ? now >= start : (now >= start && now <= end));
-            const waitingConfirmation = Array.isArray(p.milestones) && p.milestones.some((m:any) => m.confirmedByUser && !m.paidByAdmin);
-            const total = Number(p.total_cost ?? p.total ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + (Number(m.amount)||0),0) : 0));
-            const paid = Number(p.paid_amount ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + ((m.paidByAdmin ? (Number(m.amount)||0) : 0)),0) : 0));
-            const pending = Math.max(0, total - paid);
+          {tasks.length === 0 && <p>No tasks</p>}
+          {tasks.length > 0 && (
+            <div>
+              {/* If current user is staff, show aggregated finance summary */}
+              {totalsJSX}
 
-            return (
-              <TileCard
-                key={p._id}
-                meeting={{
-                  _id: p._id,
-                  title: p.title,
-                  // hide date/time/requestedBy in finance tiles
-                  date: undefined,
-                  time: undefined,
-                  requestedBy: undefined,
-                  status: active ? 'approved' : 'finished'
-                }}
-                active={active ? 'approved' : 'finished'}
-                onClick={() => openTask(p._id)}
-                rightAction={<a onClick={(e:any)=>{ e.stopPropagation(); openTask(p._id); }} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></a>}
-              >
-                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 16 }}>{`$${total.toLocaleString()}`}</div>
-                    <div style={{ marginTop: 6, display: 'flex', gap: 12 }}>
-                      <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
-                      <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
-                    </div>
+              {/* Filtering and pagination */}
+              {(() => {
+                const now = new Date();
+                const lower = (s?: any) => (s || '').toString().toLowerCase();
+                let filtered = tasks.slice();
+                if (viewMode === 'active') {
+                  filtered = tasks.filter(p => {
+                    const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+                    const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+                    return start && (!end ? now >= start : (now >= start && now <= end));
+                  });
+                } else if (viewMode === 'completed') {
+                  filtered = tasks.filter(p => lower(p.status) === 'completed' || lower(p.status) === 'done' || lower(p.status) === 'finished');
+                } else if (viewMode === 'inactive') {
+                  filtered = tasks.filter(p => {
+                    const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+                    const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+                    return (start && end && now > end) || lower(p.status) === 'inactive';
+                  });
+                }
+                const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+                const paged = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+                return <>
+                  <div style={{ display: 'grid', gap: 12 }}>
+                    {paged.map(p => {
+                      const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+                      const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+                      const active = start && (!end ? now >= start : (now >= start && now <= end));
+                      const waitingConfirmation = Array.isArray(p.milestones) && p.milestones.some((m:any) => m.confirmedByUser && !m.paidByAdmin);
+                      const total = Number(p.total_cost ?? p.total ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + (Number(m.amount)||0),0) : 0));
+                      const paid = Number(p.paid_amount ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + ((m.paidByAdmin ? (Number(m.amount)||0) : 0)),0) : 0));
+                      const pending = Math.max(0, total - paid);
+                      return (
+                        <TileCard
+                          key={p._id}
+                          meeting={{
+                            _id: p._id,
+                            title: p.title,
+                            date: undefined,
+                            time: undefined,
+                            requestedBy: undefined,
+                            status: active ? 'approved' : 'finished'
+                          }}
+                          active={active ? 'approved' : 'finished'}
+                          onClick={() => openTask(p._id)}
+                          rightAction={<a onClick={(e:any)=>{ e.stopPropagation(); openTask(p._id); }} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></a>}
+                        >
+                          <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 16 }}>{`$${total.toLocaleString()}`}</div>
+                              <div style={{ marginTop: 6, display: 'flex', gap: 12 }}>
+                                <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
+                                <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
+                              </div>
+                            </div>
+                            {waitingConfirmation ? (
+                              <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
+                                <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block', marginRight: 8 }} />
+                                <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 12, fontWeight: 700 }}>Confirmation pending</div>
+                              </div>
+                            ) : null}
+                          </div>
+                        </TileCard>
+                      );
+                    })}
                   </div>
-                  {waitingConfirmation ? (
-                    <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
-                      <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block', marginRight: 8 }} />
-                      <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 12, fontWeight: 700 }}>Confirmation pending</div>
+                  {/* Pagination controls */}
+                  {totalPages > 1 && (
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '18px 0' }}>
+                      {Array.from({ length: totalPages }).map((_, i) => (
+                        <Button key={i+1} onClick={() => setPage(i+1)} style={{ background: page === (i+1) ? 'rgba(255,255,255,0.10)' : 'transparent', minWidth: 32 }}>{i+1}</Button>
+                      ))}
                     </div>
-                  ) : null}
-                </div>
-              </TileCard>
-            );
-          })}
-        </div>
-      </div>
-      )}
-      {selectedProject ? (
-        <Dialog title={selectedProject.title} borderColor={'rgba(44, 44, 44, 0.85)'} onClose={() => setSelectedProject(null)} footer={<><Button onClick={() => setSelectedProject(null)} style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(180,180,178,0.08)' }}>Close</Button></>}>
-          <div style={{ marginTop: 6 }}>
+                  )}
+                </>;
+              })()}
+            </div>
+          )}
+          {selectedProject ? (
+            <Dialog title={selectedProject.title} borderColor={'rgba(44, 44, 44, 0.85)'} onClose={() => setSelectedProject(null)} footer={<><Button onClick={() => setSelectedProject(null)} style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(180,180,178,0.08)' }}>Close</Button></>}> 
+              <div style={{ marginTop: 6 }}>
             <div><strong>Total:</strong> {selectedProject.total_cost ?? selectedProject.total ?? (selectedProject.milestones ? selectedProject.milestones.reduce((s:any,m:any)=> s + (Number(m.amount)||0),0) : 0)}</div>
             <div style={{ marginTop: 8 }}><strong>Objectives:</strong> {(selectedProject.objectives || []).join(', ') || '—'}</div>
             {selectedProject.milestones && (

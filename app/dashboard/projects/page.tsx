@@ -206,6 +206,9 @@ function ProjectList({ refreshKey }: { refreshKey?: number }) {
   const router = useRouter();
   const [projects, setProjects] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [viewMode, setViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
+  const [page, setPage] = React.useState(1);
+  const PAGE_SIZE = 10;
 
   React.useEffect(() => { fetchList(); }, [refreshKey]);
 
@@ -263,37 +266,77 @@ function ProjectList({ refreshKey }: { refreshKey?: number }) {
 
   if (loading) return <p>Loading projects...</p>;
   if (projects.length === 0) return <p>No projects</p>;
+
+  // Filtering and pagination
+  const now = new Date();
+  const lower = (s?: any) => (s || '').toString().toLowerCase();
+  let filtered = projects.slice();
+  if (viewMode === 'active') {
+    filtered = projects.filter(p => {
+      const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+      const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+      return start && (!end ? now >= start : (now >= start && now <= end));
+    });
+  } else if (viewMode === 'completed') {
+    filtered = projects.filter(p => lower(p.status) === 'completed' || lower(p.status) === 'done' || lower(p.status) === 'finished');
+  } else if (viewMode === 'inactive') {
+    filtered = projects.filter(p => {
+      const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+      const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+      return (start && end && now > end) || lower(p.status) === 'inactive';
+    });
+  }
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+  const paged = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
   return (
-    <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
-          {projects.map(p => {
-        const stages = p.stages || [];
-        const avgStage = stages.length ? Math.round(stages.reduce((s:any, n:any) => s + (Number(n.progress) || 0), 0) / stages.length) : null;
-        // current stage: first stage with progress < 100, otherwise last stage
-        const currentIndex = stages.findIndex((s:any) => (Number(s.progress) || 0) < 100);
-        const currentStageIndex = currentIndex === -1 ? (stages.length ? stages.length - 1 : -1) : currentIndex;
-        const currentStageNumber = currentStageIndex >= 0 ? currentStageIndex + 1 : 0;
-        const currentStageProgress = currentStageIndex >= 0 ? Number(stages[currentStageIndex].progress || 0) : 0;
-            return (
-          <div key={p._id}>
-            <TileCard
-              meeting={{
-                _id: p._id,
-                title: p.title,
-                date: p.timeline?.from ? new Date(p.timeline.from).toLocaleDateString() : (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''),
-                time: p.timeline?.from ? new Date(p.timeline.from).toLocaleTimeString() : '',
-                timelineRange: (p.timeline && p.timeline.from && p.timeline.to) ? `${new Date(p.timeline.from).toLocaleDateString()} — ${new Date(p.timeline.to).toLocaleDateString()}` : (p.timeline && p.timeline.from ? new Date(p.timeline.from).toLocaleDateString() : undefined),
-                requestedBy: undefined,
-                status: p.approved ? 'approved' : (p.status_internal || p.status?.text || 'unknown')
-              }}
-              onClick={() => router.push(`/dashboard/projects/${p._id}`)}
-              active={p.approved ? 'approved' : undefined}
-              rightAction={<Link href={`/dashboard/projects/${p._id}`} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></Link>}
-              avgProgress={avgStage ?? undefined}
-              stagesCount={stages.length}
-            />
-          </div>
-        );
-      })}
+    <div style={{ marginTop: 12 }}>
+      {/* View/sort buttons, responsive */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
+        <Button onClick={() => { setViewMode('all'); setPage(1); }} style={{ background: viewMode==='all' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>All</Button>
+        <Button onClick={() => { setViewMode('active'); setPage(1); }} style={{ background: viewMode==='active' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Active</Button>
+        <Button onClick={() => { setViewMode('completed'); setPage(1); }} style={{ background: viewMode==='completed' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Completed</Button>
+        <Button onClick={() => { setViewMode('inactive'); setPage(1); }} style={{ background: viewMode==='inactive' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Inactive</Button>
+      </div>
+      <div style={{ display: 'grid', gap: 12 }}>
+        {paged.map(p => {
+          const stages = p.stages || [];
+          const avgStage = stages.length ? Math.round(stages.reduce((s:any, n:any) => s + (Number(n.progress) || 0), 0) / stages.length) : null;
+          // current stage: first stage with progress < 100, otherwise last stage
+          const currentIndex = stages.findIndex((s:any) => (Number(s.progress) || 0) < 100);
+          const currentStageIndex = currentIndex === -1 ? (stages.length ? stages.length - 1 : -1) : currentIndex;
+          const currentStageNumber = currentStageIndex >= 0 ? currentStageIndex + 1 : 0;
+          const currentStageProgress = currentStageIndex >= 0 ? Number(stages[currentStageIndex].progress || 0) : 0;
+          return (
+            <div key={p._id}>
+              <TileCard
+                meeting={{
+                  _id: p._id,
+                  title: p.title,
+                  date: p.timeline?.from ? new Date(p.timeline.from).toLocaleDateString() : (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''),
+                  time: p.timeline?.from ? new Date(p.timeline.from).toLocaleTimeString() : '',
+                  timelineRange: (p.timeline && p.timeline.from && p.timeline.to) ? `${new Date(p.timeline.from).toLocaleDateString()} — ${new Date(p.timeline.to).toLocaleDateString()}` : (p.timeline && p.timeline.from ? new Date(p.timeline.from).toLocaleDateString() : undefined),
+                  requestedBy: undefined,
+                  status: p.approved ? 'approved' : (p.status_internal || p.status?.text || 'unknown')
+                }}
+                onClick={() => router.push(`/dashboard/projects/${p._id}`)}
+                active={p.approved ? 'approved' : undefined}
+                rightAction={<Link href={`/dashboard/projects/${p._id}`} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></Link>}
+                avgProgress={avgStage ?? undefined}
+                stagesCount={stages.length}
+              />
+            </div>
+          );
+        })}
+      </div>
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '18px 0', flexWrap: 'wrap' }}>
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <Button key={i+1} onClick={() => setPage(i+1)} style={{ background: page === (i+1) ? 'rgba(255,255,255,0.10)' : 'transparent', minWidth: 32 }}>{i+1}</Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

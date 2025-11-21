@@ -10,6 +10,8 @@ const Container = styled.div<{full?:boolean}>`
   padding: 24px;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 `;
 
 const Header = styled.header`
@@ -18,6 +20,8 @@ const Header = styled.header`
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
+  overflow-x: hidden;
 `;
 
 export const Title = styled.h1`
@@ -44,6 +48,8 @@ export const Subtitle = styled.p`
 
 const Content = styled.main`
   display: block;
+  min-width: 0;
+  overflow-x: hidden;
   /* slightly larger, uniform vertical spacing */
   > * + * { margin-top: 20px; }
 `;

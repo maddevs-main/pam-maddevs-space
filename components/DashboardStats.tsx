@@ -10,13 +10,15 @@ const Grid = styled.div`
   align-items: start;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 
   @media (max-width: 1280px) {
     grid-template-columns: repeat(2, 1fr);
   }
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 `;
 
@@ -30,6 +32,8 @@ const Frame = styled.div`
   min-height: 420px;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 
   @media (min-width: 1280px) {
     min-height: 520px;
@@ -39,8 +43,8 @@ const Frame = styled.div`
     min-height: 380px;
   }
   @media (max-width: 800px) {
-    padding: 10px 6px;
-    min-height: 260px;
+    padding: 10px 4px;
+    min-height: 220px;
   }
 `;
 
@@ -51,6 +55,8 @@ const CardsWrap = styled.div`
   gap: 18px;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
@@ -58,8 +64,8 @@ const CardsWrap = styled.div`
     gap: 12px;
   }
   @media (max-width: 800px) {
-    grid-auto-rows: 120px;
-    gap: 8px;
+    grid-auto-rows: 100px;
+    gap: 6px;
   }
 `;
 
@@ -70,13 +76,15 @@ const FrameGrid = styled.div`
   align-items: start;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 
   @media (max-width: 1100px) {
     grid-template-columns: 1fr 260px;
   }
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 `;
 

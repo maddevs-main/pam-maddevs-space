@@ -26,12 +26,15 @@ const Container = styled.div`
   max-height: 110px;
   display: flex;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
   &:focus-visible { outline: 3px solid rgba(98, 99, 175, 0.18); outline-offset: 3px; }
 
   @media (max-width: 800px) {
     height: 80px;
     min-height: 80px;
     max-height: 80px;
+    padding: 0;
   }
 `;
 
@@ -43,6 +46,8 @@ const Shell = styled.div`
   height: 100%;
   width: 100%;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
 
   @media (max-width: 800px) {
     grid-template-columns: 1fr 70px;
@@ -58,9 +63,11 @@ const Left = styled.div`
   border-right: 1px solid rgba(255,255,255,0.04);
   width: 100%;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
 
   @media (max-width: 800px) {
-    padding: 6px 8px;
+    padding: 6px 4px;
   }
 `;
 
@@ -73,6 +80,9 @@ const Right = styled.div<{ $shellBg?: string }>`
   box-sizing: border-box;
   min-width: 80px;
   height: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
 
   @media (max-width: 800px) {
     min-width: 60px;
@@ -120,6 +130,7 @@ const Title = styled.h3`
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  word-break: break-all;
   @media (max-width: 800px) {
     font-size: 0.95rem;
     margin-left: 6px;

@@ -1,3 +1,9 @@
+  // Pagination and view/sort state for projects and staff finance
+  const [projectViewMode, setProjectViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
+  const [projectPage, setProjectPage] = React.useState(1);
+  const [staffViewMode, setStaffViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
+  const [staffPage, setStaffPage] = React.useState(1);
+  const PAGE_SIZE = 10;
 "use client";
 import React from 'react';
 import Card from '../../../components/ui/Card';
@@ -128,32 +134,68 @@ export default function AdminFinancePage() {
 
       <section style={{ marginTop: 12, marginBottom: 16 }}>
         <h4 style={{ margin: '0 0 8px 0' }}>Projects (consumer finances)</h4>
-        {projects.length === 0 ? <div>No projects</div> : (
-          <div style={{ display: 'grid', gap: 8 }}>
-            {projects.map(p => {
-              const now = new Date();
+        {/* View/sort buttons for projects */}
+        <div style={{ margin: '12px 0', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Button onClick={() => { setProjectViewMode('all'); setProjectPage(1); }} style={{ background: projectViewMode==='all' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>All</Button>
+          <Button onClick={() => { setProjectViewMode('active'); setProjectPage(1); }} style={{ background: projectViewMode==='active' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Active</Button>
+          <Button onClick={() => { setProjectViewMode('completed'); setProjectPage(1); }} style={{ background: projectViewMode==='completed' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Completed</Button>
+          <Button onClick={() => { setProjectViewMode('inactive'); setProjectPage(1); }} style={{ background: projectViewMode==='inactive' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Inactive</Button>
+        </div>
+        {projects.length === 0 ? <div>No projects</div> : (() => {
+          const now = new Date();
+          const lower = (s?: any) => (s || '').toString().toLowerCase();
+          let filtered = projects.slice();
+          if (projectViewMode === 'active') {
+            filtered = projects.filter(p => {
               const start = p.timeline?.from ? new Date(p.timeline.from) : null;
               const end = p.timeline?.to ? new Date(p.timeline.to) : null;
-              const active = start && (!end ? now >= start : (now >= start && now <= end));
-              return (
-                <TileCard
-                  key={p._id}
-                  meeting={{
-                    _id: p._id,
-                    title: p.title,
-                    date: p.timeline?.from ? new Date(p.timeline.from).toLocaleDateString() : (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''),
-                    time: p.timeline?.from ? new Date(p.timeline.from).toLocaleTimeString() : '',
-                    requestedBy: p.author?.name || p.author?.id || undefined,
-                    status: active ? 'approved' : 'finished'
-                  }}
-                  active={active ? 'approved' : 'finished'}
-                  onClick={() => setSelectedProject(p)}
-                  rightAction={<Button onClick={() => setSelectedProject(p)}>Open</Button>}
-                />
-              );
-            })}
-          </div>
-        )}
+              return start && (!end ? now >= start : (now >= start && now <= end));
+            });
+          } else if (projectViewMode === 'completed') {
+            filtered = projects.filter(p => lower(p.status) === 'completed' || lower(p.status) === 'done' || lower(p.status) === 'finished');
+          } else if (projectViewMode === 'inactive') {
+            filtered = projects.filter(p => {
+              const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+              const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+              return (start && end && now > end) || lower(p.status) === 'inactive';
+            });
+          }
+          const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+          const paged = filtered.slice((projectPage-1)*PAGE_SIZE, projectPage*PAGE_SIZE);
+          return <>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {paged.map(p => {
+                const start = p.timeline?.from ? new Date(p.timeline.from) : null;
+                const end = p.timeline?.to ? new Date(p.timeline.to) : null;
+                const active = start && (!end ? now >= start : (now >= start && now <= end));
+                return (
+                  <TileCard
+                    key={p._id}
+                    meeting={{
+                      _id: p._id,
+                      title: p.title,
+                      date: p.timeline?.from ? new Date(p.timeline.from).toLocaleDateString() : (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''),
+                      time: p.timeline?.from ? new Date(p.timeline.from).toLocaleTimeString() : '',
+                      requestedBy: p.author?.name || p.author?.id || undefined,
+                      status: active ? 'approved' : 'finished'
+                    }}
+                    active={active ? 'approved' : 'finished'}
+                    onClick={() => setSelectedProject(p)}
+                    rightAction={<Button onClick={() => setSelectedProject(p)}>Open</Button>}
+                  />
+                );
+              })}
+            </div>
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '18px 0' }}>
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <Button key={i+1} onClick={() => setProjectPage(i+1)} style={{ background: projectPage === (i+1) ? 'rgba(255,255,255,0.10)' : 'transparent', minWidth: 32 }}>{i+1}</Button>
+                ))}
+              </div>
+            )}
+          </>;
+        })()}
       </section>
       {/* Selected Entry Modal */}
       {selectedEntry ? (
@@ -273,49 +315,85 @@ export default function AdminFinancePage() {
           </div>
         </div>
 
-        {staffFin.length === 0 ? <div>No staff finance entries</div> : (
-          <div style={{ display: 'grid', gap: 8 }}>
-            {staffFin.map(s => {
-              const now = new Date();
+        {/* View/sort buttons for staff finance */}
+        <div style={{ margin: '12px 0', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Button onClick={() => { setStaffViewMode('all'); setStaffPage(1); }} style={{ background: staffViewMode==='all' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>All</Button>
+          <Button onClick={() => { setStaffViewMode('active'); setStaffPage(1); }} style={{ background: staffViewMode==='active' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Active</Button>
+          <Button onClick={() => { setStaffViewMode('completed'); setStaffPage(1); }} style={{ background: staffViewMode==='completed' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Completed</Button>
+          <Button onClick={() => { setStaffViewMode('inactive'); setStaffPage(1); }} style={{ background: staffViewMode==='inactive' ? 'rgba(255,255,255,0.06)' : 'transparent' }}>Inactive</Button>
+        </div>
+        {staffFin.length === 0 ? <div>No staff finance entries</div> : (() => {
+          const now = new Date();
+          const lower = (s?: any) => (s || '').toString().toLowerCase();
+          let filtered = staffFin.slice();
+          if (staffViewMode === 'active') {
+            filtered = staffFin.filter(s => {
               const start = s.start ? new Date(s.start) : null;
               const end = s.end ? new Date(s.end) : null;
-              const active = start && (!end ? now >= start : (now >= start && now <= end));
-              const userDisplay = (() => { const u = users.find(x=>String(x.id||x._id) === String(s.userId)); return u ? (u.name || u.email) : s.userId; })();
-              const ms = s.milestones || [];
-              const total = ms.reduce((acc:any, m:any) => acc + (Number(m?.amount) || 0), 0);
-              const paid = ms.reduce((acc:any, m:any) => acc + ((m && (m.paidByAdmin || m.done)) ? (Number(m.amount) || 0) : 0), 0);
-              const pending = Math.max(0, total - paid);
-              return (
-                <TileCard
-                  key={s._id}
-                  meeting={{
-                    _id: s._id,
-                    title: s.type || 'Staff Finance',
-                    date: start ? start.toLocaleDateString() : '',
-                    time: '',
-                    requestedBy: userDisplay,
-                    status: active ? 'approved' : 'finished'
-                  }}
-                  active={active ? 'approved' : 'finished'}
-                  leftContent={<div>
-                    <div style={{ fontWeight: 700 }}>{s.type}</div>
-                    <div style={{ color: 'rgba(180,180,178,0.9)', marginTop: 6 }}>User: {userDisplay}</div>
-                    <div style={{ color: 'rgba(180,180,178,0.85)', marginTop: 6 }}>Total: ${total.toLocaleString()}</div>
-                    <div style={{ color: 'rgba(180,180,178,0.75)', marginTop: 6, fontSize: 13 }}>Start: {start ? start.toLocaleDateString() : '—'} — End: {end ? end.toLocaleDateString() : '—'}</div>
-                  </div>}
-                  children={<div style={{ marginTop: 6, textAlign: 'right' }}>
-                    <div style={{ fontWeight: 800 }}>${total.toLocaleString()}</div>
-                    <div style={{ marginTop: 6, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                      <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>Paid: ${paid.toLocaleString()}</div>
-                      <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>Pending: ${pending.toLocaleString()}</div>
-                    </div>
-                  </div>}
-                  rightAction={<Button onClick={() => setSelectedEntry({ ...s, _id: String(s._id), start: s.start ? String(s.start) : null, end: s.end ? String(s.end) : null })}>Open</Button>}
-                />
-              );
-            })}
-          </div>
-        )}
+              return start && (!end ? now >= start : (now >= start && now <= end));
+            });
+          } else if (staffViewMode === 'completed') {
+            filtered = staffFin.filter(s => lower(s.status) === 'completed' || lower(s.status) === 'done' || lower(s.status) === 'finished');
+          } else if (staffViewMode === 'inactive') {
+            filtered = staffFin.filter(s => {
+              const start = s.start ? new Date(s.start) : null;
+              const end = s.end ? new Date(s.end) : null;
+              return (start && end && now > end) || lower(s.status) === 'inactive';
+            });
+          }
+          const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+          const paged = filtered.slice((staffPage-1)*PAGE_SIZE, staffPage*PAGE_SIZE);
+          return <>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {paged.map(s => {
+                const start = s.start ? new Date(s.start) : null;
+                const end = s.end ? new Date(s.end) : null;
+                const active = start && (!end ? now >= start : (now >= start && now <= end));
+                const userDisplay = (() => { const u = users.find(x=>String(x.id||x._id) === String(s.userId)); return u ? (u.name || u.email) : s.userId; })();
+                const ms = s.milestones || [];
+                const total = ms.reduce((acc:any, m:any) => acc + (Number(m?.amount) || 0), 0);
+                const paid = ms.reduce((acc:any, m:any) => acc + ((m && (m.paidByAdmin || m.done)) ? (Number(m.amount) || 0) : 0), 0);
+                const pending = Math.max(0, total - paid);
+                return (
+                  <TileCard
+                    key={s._id}
+                    meeting={{
+                      _id: s._id,
+                      title: s.type || 'Staff Finance',
+                      date: start ? start.toLocaleDateString() : '',
+                      time: '',
+                      requestedBy: userDisplay,
+                      status: active ? 'approved' : 'finished'
+                    }}
+                    active={active ? 'approved' : 'finished'}
+                    leftContent={<div>
+                      <div style={{ fontWeight: 700 }}>{s.type}</div>
+                      <div style={{ color: 'rgba(180,180,178,0.9)', marginTop: 6 }}>User: {userDisplay}</div>
+                      <div style={{ color: 'rgba(180,180,178,0.85)', marginTop: 6 }}>Total: ${total.toLocaleString()}</div>
+                      <div style={{ color: 'rgba(180,180,178,0.75)', marginTop: 6, fontSize: 13 }}>Start: {start ? start.toLocaleDateString() : '—'} — End: {end ? end.toLocaleDateString() : '—'}</div>
+                    </div>}
+                    children={<div style={{ marginTop: 6, textAlign: 'right' }}>
+                      <div style={{ fontWeight: 800 }}>${total.toLocaleString()}</div>
+                      <div style={{ marginTop: 6, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                        <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>Paid: ${paid.toLocaleString()}</div>
+                        <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>Pending: ${pending.toLocaleString()}</div>
+                      </div>
+                    </div>}
+                    rightAction={<Button onClick={() => setSelectedEntry({ ...s, _id: String(s._id), start: s.start ? String(s.start) : null, end: s.end ? String(s.end) : null })}>Open</Button>}
+                  />
+                );
+              })}
+            </div>
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '18px 0' }}>
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <Button key={i+1} onClick={() => setStaffPage(i+1)} style={{ background: staffPage === (i+1) ? 'rgba(255,255,255,0.10)' : 'transparent', minWidth: 32 }}>{i+1}</Button>
+                ))}
+              </div>
+            )}
+          </>;
+        })()}
       </section>
       {/* Create Entry Modal */}
       {showCreateModal ? (

@@ -20,6 +20,8 @@ const Container = styled.div`
   transition: all 200ms ease;
   width: 100%;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
 `;
 
 const Shell = styled.div`
@@ -28,6 +30,8 @@ const Shell = styled.div`
   border-radius: 12px;
   overflow: hidden;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
   @media (max-width: 800px) {
     grid-template-columns: 1fr 70px;
   }
@@ -42,8 +46,10 @@ const Left = styled.div`
   border-right: 1px solid rgba(255,255,255,0.04);
   width: 100%;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
   @media (max-width: 800px) {
-    padding: 6px 8px;
+    padding: 6px 4px;
   }
 `;
 
@@ -55,6 +61,9 @@ const Right = styled.div<{ $shellBg?: string }>`
   padding: 8px;
   box-sizing: border-box;
   min-width: 80px;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
   @media (max-width: 800px) {
     min-width: 60px;
     padding: 4px;
@@ -100,6 +109,7 @@ const Title = styled.h3`
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  word-break: break-all;
   @media (max-width: 800px) {
     font-size: 0.95rem;
   }

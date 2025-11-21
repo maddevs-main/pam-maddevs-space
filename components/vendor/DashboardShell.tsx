@@ -8,31 +8,67 @@ import { Home, FileText, CalendarClock, Users as UsersIcon, CreditCard, Settings
 
 const Shell = styled.div`
   display: flex;
+  height: 100vh;
   min-height: 100vh;
+  max-height: 100vh;
   --sidebar-top-height: 120px;
   --nav-item-size: 48px; /* controls icon size, label size and row height so they match */
   color: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.light) || '#F1F1F1'};
+  min-width: 0;
+  overflow: hidden;
 `;
 
 const Sidebar = styled.aside<{ collapsed?: boolean }>`
   --sidebar-collapsed: ${(p:any) => (p.collapsed ? 1 : 0)};
-  width: 88px; /* fixed collapsed width */
-  background: #786143ff; /* bright orange */
+  width: 88px;
+  min-width: 0;
+  max-width: 100vw;
+  background: #786143ff;
   border-right: 1px solid rgba(0,0,0,0.08);
   padding: 18px 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  @media (max-width: 600px) {
+    width: 60px;
+    padding: 10px 4px;
+    gap: 8px;
+  }
 `;
 
 const Expander = styled.aside`
   width: 320px;
-  background: #d8c0a7ff; /* lighter companion panel */
+  min-width: 0;
+  max-width: 100vw;
+  background: #d8c0a7ff;
   border-right: 1px solid rgba(0,0,0,0.06);
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  @media (max-width: 900px) {
+    width: 180px;
+    padding: 10px 6px;
+    gap: 6px;
+  }
+  @media (max-width: 600px) {
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
 `;
 
 const ExpanderFooter = styled.div`
@@ -48,7 +84,11 @@ const ExpanderFooter = styled.div`
 const Nav = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: 26px; /* increased vertical gap so icons are less tightly packed */
+  gap: 26px;
+  min-width: 0;
+  @media (max-width: 600px) {
+    gap: 12px;
+  }
 `;
 
 const SidebarFooter = styled.div`
@@ -72,10 +112,11 @@ const NavButton = styled.div<{ collapsed?: boolean; $active?: boolean; $hovered?
   border-radius: 6px;
   transition: background 120ms ease, color 120ms ease;
   width: 100%;
-  justify-content: flex-start; /* left-align icons so they sit directly next to expander labels */
+  justify-content: flex-start;
   height: var(--nav-item-size);
   box-shadow: ${(p:any) => (p.$active ? '0 6px 18px rgba(0,0,0,0.08)' : 'none')};
-
+  min-width: 0;
+  overflow: hidden;
   svg {
     color: black;
     stroke: currentColor;
@@ -83,15 +124,21 @@ const NavButton = styled.div<{ collapsed?: boolean; $active?: boolean; $hovered?
     height: var(--nav-item-size);
     transition: transform 120ms ease;
     flex-shrink: 0;
+    min-width: 0;
+    max-width: 100%;
   }
-
   &:hover {
     background: rgba(0,0,0,0.06);
     color: black;
   }
-  
-  /* slightly enlarge icon when active/hovered for affordance */
   ${(p:any) => (p.$active || p.$hovered) ? `svg { transform: scale(1.03); }` : ''}
+  @media (max-width: 600px) {
+    gap: 6px;
+    padding: 0 4px;
+    height: 40px;
+    font-size: 13px;
+    svg { width: 28px; height: 28px; }
+  }
 `;
 
 const LogoutButton = styled.button`
@@ -141,6 +188,15 @@ const Main = styled.main`
   flex: 1;
   padding: 28px;
   background: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.bg) || '#000000'};
+  min-width: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Hide scrollbars on Mac for a cleaner look, but keep them usable */
+  scrollbar-width: thin;
+  &::-webkit-scrollbar { width: 8px; background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(120,120,120,0.12); border-radius: 8px; }
 `;
 
 export default function DashboardShell({ children, active }: { children: React.ReactNode; active?: string }) {
