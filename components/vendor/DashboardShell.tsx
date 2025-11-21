@@ -32,11 +32,7 @@ const Sidebar = styled.aside<{ collapsed?: boolean }>`
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
-  @media (max-width: 600px) {
-    width: 60px;
-    padding: 10px 4px;
-    gap: 8px;
-  }
+
 `;
 
 const Expander = styled.aside`
@@ -52,23 +48,7 @@ const Expander = styled.aside`
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
-  @media (max-width: 900px) {
-    width: 180px;
-    padding: 10px 6px;
-    gap: 6px;
-  }
-  @media (max-width: 600px) {
-    width: 100vw;
-    min-width: 0;
-    max-width: 100vw;
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 100;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  }
+
 `;
 
 const ExpanderFooter = styled.div`
@@ -86,9 +66,7 @@ const Nav = styled.nav`
   flex-direction: column;
   gap: 26px;
   min-width: 0;
-  @media (max-width: 600px) {
-    gap: 12px;
-  }
+
 `;
 
 const SidebarFooter = styled.div`
@@ -132,13 +110,7 @@ const NavButton = styled.div<{ collapsed?: boolean; $active?: boolean; $hovered?
     color: black;
   }
   ${(p:any) => (p.$active || p.$hovered) ? `svg { transform: scale(1.03); }` : ''}
-  @media (max-width: 600px) {
-    gap: 6px;
-    padding: 0 4px;
-    height: 40px;
-    font-size: 13px;
-    svg { width: 28px; height: 28px; }
-  }
+
 `;
 
 const LogoutButton = styled.button`

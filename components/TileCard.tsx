@@ -126,11 +126,10 @@ const Title = styled.h3`
   font-weight: 600;
   color: #ffffff;
   margin-left: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   max-width: 100%;
-  word-break: break-all;
+  white-space: normal;
   @media (max-width: 800px) {
     font-size: 0.95rem;
     margin-left: 6px;

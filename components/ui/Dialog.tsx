@@ -79,6 +79,9 @@ const Body = styled.div`
   overflow: auto;
   flex: 1 1 auto;
   min-width: 0;
+  max-width: 100vw;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 
   input, textarea, select {
     background: #2f2f2f;
@@ -89,6 +92,8 @@ const Body = styled.div`
     font-size: 15px;
     width: 100%;
     box-sizing: border-box;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   textarea { min-height: 120px; }
