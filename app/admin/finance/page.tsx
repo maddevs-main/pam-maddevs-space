@@ -1,9 +1,4 @@
-  // Pagination and view/sort state for projects and staff finance
-  const [projectViewMode, setProjectViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
-  const [projectPage, setProjectPage] = React.useState(1);
-  const [staffViewMode, setStaffViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
-  const [staffPage, setStaffPage] = React.useState(1);
-  const PAGE_SIZE = 10;
+
 "use client";
 import React from 'react';
 import Card from '../../../components/ui/Card';
@@ -22,7 +17,12 @@ export default function AdminFinancePage() {
   const [selectedEntry, setSelectedEntry] = React.useState<any | null>(null);
   const [selectedProject, setSelectedProject] = React.useState<any | null>(null);
   const [loading, setLoading] = React.useState(true);
-
+  // Pagination and view/sort state for projects and staff finance
+  const [projectViewMode, setProjectViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
+  const [projectPage, setProjectPage] = React.useState(1);
+  const [staffViewMode, setStaffViewMode] = React.useState<'all'|'active'|'completed'|'inactive'>('all');
+  const [staffPage, setStaffPage] = React.useState(1);
+  const PAGE_SIZE = 10;
   React.useEffect(()=>{ load(); }, []);
 
   async function load() {
