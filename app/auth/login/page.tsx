@@ -196,6 +196,7 @@ export default function LoginPage() {
   const [showNotification, setShowNotification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(false);
 
   const handleForgotClick = () => {
     setShowNotification(true);
@@ -209,12 +210,16 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    setRetry(false);
     try {
       // Use NextAuth signIn with credentials provider. We use redirect: false and handle client-side navigation.
       const res: any = await signIn('credentials', { redirect: false, email, password });
       if (!res || res.error) {
-        setError((res && res.error) || 'Login failed');
+        setError(res?.error === 'CredentialsSignin'
+          ? 'The email or password you entered is incorrect. Please check and try again.'
+          : (res?.error || 'We couldn’t log you in. Please try again.'));
         setLoading(false);
+        setRetry(true);
         return;
       }
 
@@ -241,19 +246,19 @@ export default function LoginPage() {
       if (foundUser) {
         let dest = '/dashboard';
         if (foundUser.role === 'admin') dest = '/admin';
-        // staff and consumer both use /dashboard (role-specific pages are shown there)
-        // use client router for SPA navigation
         router.replace(dest);
         return;
       }
 
       // Fallback: keep the user on the login page and surface an error
-      setError('Unable to confirm session after sign-in. Please try again.');
+      setError('We couldn’t confirm your session after signing in. This may be a network or server issue. Please try again, or refresh the page.');
       setLoading(false);
+      setRetry(true);
       return;
     } catch (err) {
       console.error(err);
-      setError('Login failed');
+      setError('Something went wrong while signing you in. Please try again.');
+      setRetry(true);
     } finally {
       setLoading(false);
     }
@@ -284,7 +289,29 @@ export default function LoginPage() {
               </FieldWrapper>
 
               {showNotification && (<Notification>Please contact your administrator.</Notification>)}
-              {error && (<Notification style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>{error}</Notification>)}
+              {error && (
+                <Notification style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                  {error}
+                  {retry && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <button
+                        type="button"
+                        style={{ background: '#d8c0a7', color: '#292524', border: 'none', borderRadius: 6, padding: '0.5rem 1.25rem', fontWeight: 500, cursor: 'pointer', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }}
+                        onClick={() => { setError(null); setRetry(false); setLoading(false); }}
+                      >
+                        Try Again
+                      </button>
+                      <button
+                        type="button"
+                        style={{ background: 'transparent', color: '#786143', border: 'none', marginLeft: '1rem', textDecoration: 'underline', cursor: 'pointer' }}
+                        onClick={() => window.location.reload()}
+                      >
+                        Refresh Page
+                      </button>
+                    </div>
+                  )}
+                </Notification>
+              )}
 
               <FieldWrapper>
                 <SubmitButton type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</SubmitButton>
