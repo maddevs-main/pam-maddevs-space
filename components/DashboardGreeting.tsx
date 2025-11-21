@@ -23,7 +23,7 @@ export default function DashboardGreeting() {
     let mounted = true;
     async function load() {
       try {
-        const res = await fetch('/api/auth/me');
+        const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
         if (!mounted) return;
         if (!res.ok) { setUser(null); return; }
         const data = await res.json();

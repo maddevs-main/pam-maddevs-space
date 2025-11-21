@@ -1,0 +1,30 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import connectToDatabase from '../../../lib/mongodb';
+import bcrypt from 'bcrypt';
+import { signToken } from '../../../lib/jwt';
+import { setLoginCookie } from '../../../lib/auth';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') return res.status(405).end();
+  const { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'missing_fields' });
+
+  try {
+    const { db } = await connectToDatabase();
+    const user = await db.collection('users').findOne({ email });
+    if (!user) return res.status(401).json({ error: 'invalid_credentials' });
+
+    const ok = await bcrypt.compare(password, user.passwordHash || '');
+    if (!ok) return res.status(401).json({ error: 'invalid_credentials' });
+
+    const payload = { userId: user._id.toString(), role: user.role, tenantId: user.tenantId || null };
+    const token = signToken(payload);
+    setLoginCookie(res, token);
+
+    // Return minimal user profile
+    res.json({ ok: true, user: { id: user._id.toString(), email: user.email, role: user.role, name: user.name } });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: 'server_error' });
+  }
+}

@@ -1,23 +1,19 @@
 import Header from '../../components/Header';
 import DashboardShell from '../../components/vendor/DashboardShell';
-import { cookies } from 'next/headers';
-import { verifyToken } from '../../lib/jwt';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../lib/nextAuth';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = cookies();
-  const token = cookieStore.get('pam_token')?.value || null;
-  if (!token) redirect('/auth/login');
-  const payload = verifyToken(token as string);
-  if (!payload) redirect('/auth/login');
-  if (payload.role !== 'admin') redirect('/dashboard');
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions as any) as { user?: any };
+  if (!session || !session.user) redirect('/auth/login');
+  if ((session.user as any).role !== 'admin') redirect('/dashboard');
 
-  const initialUser = { id: payload.userId, role: payload.role, tenantId: payload.tenantId };
+  const initialUser = { id: (session.user as any).id, role: (session.user as any).role, tenantId: (session.user as any).tenantId };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* @ts-expect-error Server -> Client prop (serializable) */}
-      <Header title="PAM — Admin" initialUser={initialUser} />
+      <Header title="maddevs" initialUser={initialUser} />
       <DashboardShell>
         {children}
       </DashboardShell>

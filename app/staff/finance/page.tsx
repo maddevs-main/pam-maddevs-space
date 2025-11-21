@@ -44,7 +44,7 @@ export default function StaffFinancePage() {
   if (loading) return <div style={{ padding: 12 }}>Loading...</div>;
 
   // calendar items: pass ISO/date strings for consistency
-  const calItems = entries.map((e:any) => ({ id: String(e._id), title: e.type || 'Staff Finance', from: e.start ? String(e.start) : null, to: e.end ? String(e.end) : null, color: 'var(--color-yes)', type: 'meeting' }));
+  const calItems = entries.map((e:any) => ({ id: String(e._id), title: e.type || e.title || 'Finance', from: e.start ? String(e.start) : null, to: e.end ? String(e.end) : null, color: 'var(--color-yes)', type: 'meeting' }));
 
   return (
     <PageShell title="Finance" subtitle="Staff finance entries" actions={<div style={{ maxWidth: 220 }}><CalendarAction items={calItems} title="Finance calendar" /></div>}>
@@ -62,9 +62,9 @@ export default function StaffFinancePage() {
               const pending = Math.max(0, total - paid);
 
               return (
-                <TileCard
-                  key={e._id}
-                  meeting={{ _id: e._id, title: e.type || 'Staff Finance', date: start ? start.toLocaleDateString() : '', time: '', requestedBy: e.userId || e.user || undefined, status: active ? 'approved' : 'finished' }}
+                  <TileCard
+                    key={e._id}
+                    meeting={{ _id: e._id, title: e.type || e.title || 'Finance', date: start ? start.toLocaleDateString() : '', time: '', requestedBy: e.userId || e.user || undefined, status: active ? 'approved' : 'finished' }}
                   active={active ? 'approved' : 'finished'}
                   onClick={() => openEntry(e._id)}
                   rightAction={<a onClick={(ev:any)=>{ ev.stopPropagation(); openEntry(e._id); }} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></a>}
@@ -97,7 +97,7 @@ export default function StaffFinancePage() {
             const sPaid = sm.reduce((s:any, m:any) => s + ((m && (m.paidByAdmin || m.done)) ? (Number(m.amount) || 0) : 0), 0);
             const sPending = Math.max(0, sTotal - sPaid);
             return (
-              <Dialog title={`Staff Finance — ${selectedEntry.type}`} onClose={() => setSelectedEntry(null)} footer={<><Button onClick={() => setSelectedEntry(null)} style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(180,180,178,0.08)' }}>Close</Button></>}>
+              <Dialog title={`${selectedEntry.type || selectedEntry.title || 'Finance'}`} onClose={() => setSelectedEntry(null)} footer={<><Button onClick={() => setSelectedEntry(null)} style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(180,180,178,0.08)' }}>Close</Button></>}>
                 <div style={{ marginTop: 6 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 12, alignItems: 'center' }}>
                     <div>

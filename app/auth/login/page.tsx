@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from 'react';
+import Header from '../../../components/Header';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -144,7 +146,7 @@ const FooterNote = styled.div`
   color: #374151;
 `;
 
-const FooterLink = styled.a`
+const FooterLink = styled.span`
   color: #292524;
   font-weight: 600;
   margin-left: 0.25rem;
@@ -200,31 +202,66 @@ export default function LoginPage() {
     setTimeout(()=>setShowNotification(false), 3000);
   };
 
+  // Progressive enhancement: intercept the form submit in JS, POST via fetch,
+  // then poll /api/auth/me until the server-side cookie is usable before redirecting.
+  // If JS is disabled, the form will fall back to a normal HTML POST (method/action present).
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/local-login', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json().catch(()=>({}));
-      if (!res.ok) { setError(data?.error || JSON.stringify(data)); setLoading(false); return; }
+      // Use NextAuth signIn with credentials provider. We use redirect: false and handle client-side navigation.
+      const res: any = await signIn('credentials', { redirect: false, email, password });
+      if (!res || res.error) {
+        setError((res && res.error) || 'Login failed');
+        setLoading(false);
+        return;
+      }
 
-      try {
-        const meRes = await fetch('/api/auth/me');
-        if (!meRes.ok) { router.push('/dashboard'); return; }
-        const me = await meRes.json();
-        const role = me?.user?.role || 'consumer';
-        if (role === 'admin') router.push('/admin'); else router.push('/dashboard');
-      } catch (err) { console.error(err); router.push('/dashboard'); }
-    } catch (err) { console.error(err); setError('Login failed'); }
-    finally { setLoading(false); }
+      // signIn succeeded client-side, but NextAuth sets an HttpOnly cookie on the response.
+      // The server-side session may not be immediately available to our server-rendered layouts,
+      // so poll `/api/auth/me` (which uses getServerSession) until the session is visible, then redirect
+      // to the appropriate dashboard based on role.
+      const maxAttempts = 12; // ~ 2.4s
+      const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+      let attempts = 0;
+      let foundUser: any = null;
+      while (attempts < maxAttempts) {
+        try {
+          const check = await fetch('/api/auth/me', { credentials: 'same-origin' });
+          if (check.ok) {
+            const data = await check.json();
+            if (data && data.user) { foundUser = data.user; break; }
+          }
+        } catch (e) { /* ignore transient errors */ }
+        attempts += 1;
+        await delay(200);
+      }
+
+      if (foundUser) {
+        let dest = '/dashboard';
+        if (foundUser.role === 'admin') dest = '/admin';
+        // staff and consumer both use /dashboard (role-specific pages are shown there)
+        // use client router for SPA navigation
+        router.replace(dest);
+        return;
+      }
+
+      // Fallback: keep the user on the login page and surface an error
+      setError('Unable to confirm session after sign-in. Please try again.');
+      setLoading(false);
+      return;
+    } catch (err) {
+      console.error(err);
+      setError('Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
+      <Header title="maddevs" />
       <GlobalStyle />
       <Background>
         <Overlay />
@@ -232,7 +269,7 @@ export default function LoginPage() {
           <Container>
             <Card>
               <Title>Login</Title>
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit} method="post" action="/api/auth/local-login">
               <FieldWrapper>
                 <Label htmlFor="email" style={{ marginBottom: '0.5rem' }}>Email Address</Label>
                 <IconInput id="email" name="email" type="email" autoComplete="email" required placeholder="your.email@example.com" icon={<Mail className="w-5 h-5 text-gray-400" />} value={email} onChange={(e)=>setEmail(e.target.value)} />
@@ -256,7 +293,7 @@ export default function LoginPage() {
               <FieldWrapper>
                 <FooterNote>
                   Don't have an account?
-                  <Link href="/auth/register" passHref legacyBehavior>
+                  <Link href="/auth/register">
                     <FooterLink>Register</FooterLink>
                   </Link>
                 </FooterNote>

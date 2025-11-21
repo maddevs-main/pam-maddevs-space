@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../../lib/mongodb';
-import { requireAuth, getUserFromRequest } from '../../../../lib/auth';
+import { requireAuth } from '../../../../lib/auth';
 import { ObjectId } from 'mongodb';
 
 // simple in-memory rate limiter (per-process). For production, replace with Redis-backed limiter.
@@ -10,11 +10,11 @@ const rateMap: Map<string, { count: number; windowStart: number }> = (global as 
 (global as any).__CHAT_RATE_LIMIT_MAP = rateMap;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const payload: any = getUserFromRequest(req as any);
-  if (!payload) return res.status(401).json({ error: 'unauthenticated' });
+  const auth: any = (req as any).auth;
+  if (!auth) return res.status(401).json({ error: 'unauthenticated' });
 
-  const userId = payload.userId;
-  const authRole = payload.role;
+  const userId = auth.userId;
+  const authRole = auth.role;
   const otherId = Array.isArray(req.query.userId) ? req.query.userId[0] : req.query.userId as string;
   if (!otherId) return res.status(400).json({ error: 'missing_user' });
 

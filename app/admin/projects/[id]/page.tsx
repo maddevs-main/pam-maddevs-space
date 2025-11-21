@@ -41,8 +41,9 @@ const PlusButton = styled.button`
   &:focus-visible { outline: 3px solid rgba(96,165,250,0.3); outline-offset: 4px; }
 `;
 
-export default function AdminProjectDetail({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function AdminProjectDetail({ params }: { params: any }) {
+  const resolvedParams = (React as any).use ? (React as any).use(params) : params;
+  const { id } = resolvedParams || {};
   return <AdminProject id={id} />;
 }
 

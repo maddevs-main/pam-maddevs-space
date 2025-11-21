@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Header from '../../../components/Header';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, User, Building, Ticket } from 'lucide-react';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -137,7 +138,7 @@ const FooterNote = styled.div`
   color: #374151;
 `;
 
-const FooterLink = styled.a`
+const FooterLink = styled.span`
   color: #292524;
   font-weight: 600;
   margin-left: 0.25rem;
@@ -323,6 +324,7 @@ export default function RegisterPage() {
 
   return (
     <>
+      <Header title="maddevs" />
       <GlobalStyle />
       <Background>
         <Overlay />
@@ -428,7 +430,7 @@ export default function RegisterPage() {
               <FieldWrapper>
                 <FooterNote>
                   Already have an account?
-                  <Link href="/auth/login" passHref legacyBehavior>
+                  <Link href="/auth/login">
                     <FooterLink>Sign in</FooterLink>
                   </Link>
                 </FooterNote>

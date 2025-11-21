@@ -1,14 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../lib/mongodb';
-import { requireAuth, getUserFromRequest } from '../../../lib/auth';
+import { requireAuth } from '../../../lib/auth';
 import { ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const payload: any = getUserFromRequest(req as any);
-  if (!payload) return res.status(401).json({ error: 'unauthenticated' });
-
-  const userId = payload.userId;
+  const auth: any = (req as any).auth;
+  if (!auth) return res.status(401).json({ error: 'unauthenticated' });
+  const userId = auth.userId;
   const { db } = await connectToDatabase();
 
   if (req.method === 'GET') {

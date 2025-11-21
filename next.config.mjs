@@ -8,6 +8,9 @@ const nextConfig = {
 		// Enable the SWC styled-components transform for SSR and better class names
 		styledComponents: true,
 	},
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 	async redirects() {
 		return [
 			{

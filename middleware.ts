@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
 // Middleware to enforce admin routes access. It calls /api/auth/me to validate session and role.
 export async function middleware(req: NextRequest) {
@@ -15,44 +16,15 @@ export async function middleware(req: NextRequest) {
 
   if (!protectedAdmin && !protectedStaff && !protectedConsumerMeetings) return NextResponse.next();
 
+  // Use NextAuth `getToken` to validate the JWT session in middleware (works in Edge).
   try {
-    const meRes = await fetch(origin + '/api/auth/me', { headers: { cookie: req.headers.get('cookie') || '' } });
-    if (!meRes.ok) {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+    if (!token) {
       const url = req.nextUrl.clone();
       url.pathname = '/auth/login';
       return NextResponse.redirect(url);
     }
-
-    const data = await meRes.json();
-    const role = data?.user?.role;
-
-    if (protectedAdmin) {
-      if (role !== 'admin') {
-        const url = req.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
-      }
-      return NextResponse.next();
-    }
-
-    if (protectedStaff) {
-      if (role !== 'staff') {
-        const url = req.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
-      }
-      return NextResponse.next();
-    }
-
-    if (protectedConsumerMeetings) {
-      if (role !== 'consumer') {
-        const url = req.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
-      }
-      return NextResponse.next();
-    }
-
+    // Token exists; server-side layouts will still perform role checks where needed.
     return NextResponse.next();
   } catch (err) {
     const url = req.nextUrl.clone();

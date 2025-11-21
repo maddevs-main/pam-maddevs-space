@@ -18,6 +18,7 @@ export default function ProjectForm({ initial, mode = 'create', projectId, onDon
   const [startDate, setStartDate] = React.useState(initial?.timeline?.from || '');
   const [endDate, setEndDate] = React.useState(initial?.timeline?.to || '');
   const [message, setMessage] = React.useState<string | null>(null);
+  const [projType, setProjType] = React.useState<string>(initial?.type || '');
   const [approved, setApproved] = React.useState<number | boolean>(initial?.approved ? 1 : 0);
   const [statusInternal, setStatusInternal] = React.useState<string>(initial?.status_internal || '');
   const [statusText, setStatusText] = React.useState<string>(initial?.status?.text || '');
@@ -45,6 +46,7 @@ export default function ProjectForm({ initial, mode = 'create', projectId, onDon
     setFilebaseLinksStr((initial?.filebase_links || []).join(','));
     setCredentialLinksStr((initial?.credential_links || []).join(','));
     setOtherLinksStr((initial?.other_links || []).join(','));
+    setProjType(initial?.type || '');
     setApproved(initial?.approved ? 1 : 0);
     setStatusInternal(initial?.status_internal || '');
     setStatusText(initial?.status?.text || '');
@@ -96,6 +98,7 @@ export default function ProjectForm({ initial, mode = 'create', projectId, onDon
       body.approved = approved ? 1 : 0;
       body.status_internal = statusInternal;
       body.status = { text: statusText, stage: Number(statusStage || 0) };
+      body.type = projType || undefined;
       body.people_allocated = String(peopleAllocatedStr || '').split(',').map(s => s.trim()).filter(Boolean);
       body.staff = String(staffStr || '').split(',').map(s => s.trim()).filter(Boolean);
     }
@@ -130,13 +133,20 @@ export default function ProjectForm({ initial, mode = 'create', projectId, onDon
               <label style={{ display: 'block', marginBottom: 6 }}>Filebase links</label>
               <TextInput placeholder="https://... , https://..." value={filebaseLinksStr} onChange={e => setFilebaseLinksStr((e.target as HTMLInputElement).value)} />
             </div>
+
             <div>
               <label style={{ display: 'block', marginBottom: 6 }}>Credential links</label>
               <TextInput placeholder="https://... , https://..." value={credentialLinksStr} onChange={e => setCredentialLinksStr((e.target as HTMLInputElement).value)} />
             </div>
+
             <div>
               <label style={{ display: 'block', marginBottom: 6 }}>Other links</label>
               <TextInput placeholder="https://... , https://..." value={otherLinksStr} onChange={e => setOtherLinksStr((e.target as HTMLInputElement).value)} />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: 6 }}>Project type (displayed on detail page)</label>
+              <TextInput value={projType} onChange={e => setProjType((e.target as HTMLInputElement).value)} placeholder="e.g. Website, Integration, Design" />
             </div>
           </div>
         </div>

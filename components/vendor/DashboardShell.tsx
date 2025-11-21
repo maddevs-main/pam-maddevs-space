@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import Link from 'next/link';
@@ -58,7 +59,7 @@ const SidebarFooter = styled.div`
   padding-top: 8px;
 `;
 
-const NavButton = styled.a<{ collapsed?: boolean; $active?: boolean; $hovered?: boolean }>`
+const NavButton = styled.div<{ collapsed?: boolean; $active?: boolean; $hovered?: boolean }>`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -143,7 +144,8 @@ const Main = styled.main`
 `;
 
 export default function DashboardShell({ children, active }: { children: React.ReactNode; active?: string }) {
-  const [role, setRole] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const role = (session && (session as any).user && (session as any).user.role) ? (session as any).user.role : null;
   const pathname = usePathname();
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
@@ -177,12 +179,11 @@ export default function DashboardShell({ children, active }: { children: React.R
 
   async function handleLogout() {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await signOut({ callbackUrl: '/auth/login' });
     } catch (err) {
-      // ignore
+      // fallback: redirect
+      if (typeof window !== 'undefined') window.location.href = '/auth/login';
     }
-    // redirect to login
-    if (typeof window !== 'undefined') window.location.href = '/auth/login';
   }
 
   function toggleCollapse() {
@@ -200,22 +201,7 @@ export default function DashboardShell({ children, active }: { children: React.R
     try { localStorage.setItem('sidebar_collapsed', '1'); } catch (e) {}
   }
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (!mounted) return;
-        if (!res.ok) { setRole(null); return; }
-        const data = await res.json();
-        setRole(data?.user?.role || null);
-      } catch (err) {
-        setRole(null);
-      }
-    }
-    load();
-    return () => { mounted = false; };
-  }, []);
+  // role is derived from NextAuth session via `useSession`
 
   return (
     <Shell>
@@ -264,7 +250,7 @@ export default function DashboardShell({ children, active }: { children: React.R
             );
 
             return items.map((it) => (
-              <Link href={it.href} key={it.key} passHref legacyBehavior>
+              <Link href={it.href} key={it.key}>
                 <NavButton
                   collapsed={collapsed}
                   aria-current={active === it.key ? 'page' : undefined}
@@ -332,15 +318,15 @@ export default function DashboardShell({ children, active }: { children: React.R
                 const background = isActive || isHovered ? 'rgba(164, 151, 135, 0.7)' : 'transparent';
 
                 return (
-                <Link href={it.href} key={`exp-${it.key}`} passHref legacyBehavior>
-                  <a
+                <Link href={it.href} key={`exp-${it.key}`}>
+                  <div
                     onMouseEnter={() => setHoveredKey(it.key)}
                     onMouseLeave={() => setHoveredKey(null)}
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', padding: '8px 12px', borderRadius: 6, textDecoration: 'none', color, background }}
                   >
                     {/* left-align label flush with the expander panel's left edge */}
                     <div style={{ marginLeft: 0, fontSize: 48, fontWeight: 900, lineHeight: 1, textAlign: 'left' }}>{it.label}</div>
-                  </a>
+                  </div>
                 </Link>
               );
             });

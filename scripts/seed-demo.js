@@ -125,6 +125,64 @@ async function seed() {
 
     console.log('Demo invite code: demo-invite-001');
 
+    // ALSO: create a top-level project document, a task and a meeting tied to them
+    try {
+      const projectDoc = {
+        title: 'Demo Project Alpha (top-level)',
+        tenantId,
+        author: { id: resultConsumer.insertedId, name: consumer.name, email: consumer.email },
+        description: 'Top-level copy of the demo project for admin/staff flows',
+        status: { text: 'requested', stage: 0 },
+        people_allocated: [],
+        staff: [resultStaff.insertedId],
+        filebase_links: [],
+        credential_links: [],
+        other_links: [],
+        milestones: [],
+        stages: [{ name: 'Discovery', progress: 10 }],
+        timeline: { from: new Date(), to: null },
+        created_at: new Date(),
+        updated_at: new Date(),
+        approved: 0
+      };
+
+      const resProj = await db.collection('projects').insertOne(projectDoc);
+      console.log('Inserted demo project id:', resProj.insertedId.toString());
+
+      const taskDoc = {
+        title: 'Demo Task for project',
+        projectId: resProj.insertedId,
+        assignedTo: { id: resultStaff.insertedId, name: staff.name, email: staff.email },
+        author: { id: resultConsumer.insertedId, name: consumer.name, email: consumer.email },
+        description: 'A sample task created by the seeder',
+        status: { text: 'open' },
+        stages: [{ name: 'Setup', progress: 20 }],
+        timeline: { from: new Date(), to: null },
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      const resTask = await db.collection('tasks').insertOne(taskDoc);
+      console.log('Inserted demo task id:', resTask.insertedId.toString());
+
+      const meetingDoc = {
+        title: 'Demo Discovery Meeting',
+        projectId: resProj.insertedId,
+        taskId: resTask.insertedId,
+        type: 'discovery',
+        scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        status: 'scheduled',
+        requestedBy: { id: resultConsumer.insertedId, email: consumer.email },
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      const resMeeting = await db.collection('meetings').insertOne(meetingDoc);
+      console.log('Inserted demo meeting id:', resMeeting.insertedId.toString());
+    } catch (e) {
+      console.warn('Failed to insert demo project/task/meeting', e);
+    }
+
     console.log('\nDemo seeding complete. Credentials:');
     console.log('Admin:   admin@pam.test / adminpass');
     console.log('Staff:   staff@pam.test / staffpass');

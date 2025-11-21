@@ -39,6 +39,51 @@ const TimeInput = styled(TextInput)`
   -webkit-appearance: none;
 `;
 
+const SquarePlus = styled.button`
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 10px;
+  background: #066011ff;
+  border: 1px solid rgba(0,0,0,0.08);
+  color: ${(p:any) => p.theme?.colors?.light || '#fff'};
+  cursor: pointer;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background 140ms ease, transform 120ms ease;
+  &:hover { background: rgba(var(--color-yes-rgb),0.90); transform: translateY(-2px); }
+  &:active { transform: translateY(0); }
+  &:focus-visible { outline: 3px solid rgba(255,255,255,0.06); outline-offset: 3px; }
+`;
+
+const FooterNeutral = styled(SquarePlus)`
+  background: transparent;
+  border: 1px solid rgba(63, 63, 60, 0.08);
+  color: ${(p:any) => p.theme?.colors?.light || '#fff'};
+  padding: 8px 12px;
+  height: 44px;
+  font-weight: 700;
+  font-size: 14px;
+  gap: 8px;
+  &:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+`;
+
+const FooterPrimary = styled(SquarePlus)`
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 14px;
+  height: 44px;
+  font-weight: 700;
+  font-size: 14px;
+  gap: 10px;
+  &:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
+`;
+
 export default function MeetingsView() {
   const [meetings, setMeetings] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -52,12 +97,12 @@ export default function MeetingsView() {
   async function init() {
     setLoading(true);
     try {
-      const me = await fetch('/api/auth/me');
+      const me = await fetch('/api/auth/me', { credentials: 'same-origin' });
       if (!me.ok) { window.location.href = '/auth/login'; return; }
       const userData = await me.json();
       setCurrentUser(userData.user || userData);
 
-      const md = await fetch('/api/meetings');
+      const md = await fetch('/api/meetings', { credentials: 'same-origin' });
       if (!md.ok) { setMeetings([]); setLoading(false); return; }
       const d = await md.json(); setMeetings(d.meetings || []);
     } catch (e) { setMeetings([]); }
@@ -80,7 +125,7 @@ export default function MeetingsView() {
     }
     const body: any = { title, type, link };
     if (scheduledAt) body.scheduledAt = scheduledAt;
-    const res = await fetch('/api/meetings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch('/api/meetings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' });
     if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Error: '+JSON.stringify(d)); return; }
     alert('Requested'); init();
   }
@@ -93,7 +138,7 @@ export default function MeetingsView() {
     }
     if (!confirm('Delete this meeting?')) return;
     try {
-      const res = await fetch('/api/meetings/' + id, { method: 'DELETE' });
+      const res = await fetch('/api/meetings/' + id, { method: 'DELETE', credentials: 'same-origin' });
       if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Delete failed: ' + (d.error || res.statusText)); return; }
       setSelectedMeeting(null);
       init();
@@ -106,7 +151,7 @@ export default function MeetingsView() {
       if (opts.scheduledAt) body.scheduledAt = opts.scheduledAt;
       if (opts.link) body.link = opts.link;
       if (opts.note) body.note = opts.note;
-      const res = await fetch('/api/meetings/' + meetingId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res = await fetch('/api/meetings/' + meetingId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' });
       if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Action failed: ' + (d.error || res.statusText)); return false; }
       await init();
       return true;
@@ -143,50 +188,6 @@ export default function MeetingsView() {
   }
 
   if (loading) return <div style={{ padding: 16 }}>Loading...</div>;
-    const SquarePlus = styled.button`
-      height: 48px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      border-radius: 10px;
-      background: #066011ff;
-      border: 1px solid rgba(0,0,0,0.08);
-      color: ${(p:any) => p.theme?.colors?.light || '#fff'};
-      cursor: pointer;
-      padding: 8px 14px;
-      font-weight: 700;
-      font-size: 14px;
-      transition: background 140ms ease, transform 120ms ease;
-      &:hover { background: rgba(var(--color-yes-rgb),0.90); transform: translateY(-2px); }
-      &:active { transform: translateY(0); }
-      &:focus-visible { outline: 3px solid rgba(255,255,255,0.06); outline-offset: 3px; }
-    `;
-
-    const FooterNeutral = styled(SquarePlus)`
-      background: transparent;
-      border: 1px solid rgba(63, 63, 60, 0.08);
-      color: ${(p:any) => p.theme?.colors?.light || '#fff'};
-      padding: 8px 12px;
-      height: 44px;
-      font-weight: 700;
-      font-size: 14px;
-      gap: 8px;
-      &:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
-      &:active { transform: translateY(0); }
-    `;
-
-    const FooterPrimary = styled(SquarePlus)`
-      background: rgba(255,255,255,0.06);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 8px 14px;
-      height: 44px;
-      font-weight: 700;
-      font-size: 14px;
-      gap: 10px;
-      &:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
-    `;
 
     // calendar items: meetings — map statuses to central palette
     const calItems = meetings.map((m:any) => {

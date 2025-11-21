@@ -49,11 +49,29 @@ export default function StaffTasksPage() {
         {tasks.map(t => {
           const timelineRange = (t.timeline && t.timeline.from && t.timeline.to) ? `${new Date(t.timeline.from).toLocaleDateString()} — ${new Date(t.timeline.to).toLocaleDateString()}` : (t.timeline && t.timeline.from ? new Date(t.timeline.from).toLocaleDateString() : undefined);
           const statusText = t.status?.text || t.status || 'open';
+
+          // Derive progress: prefer explicit `t.progress`, otherwise average over `stages` or `subtasks`.
+          let progressValue = 0;
+          let avgProgress: number | undefined = undefined;
+          let stagesCount = 0;
+          const stages = Array.isArray(t.stages) ? t.stages : (Array.isArray(t.subtasks) ? t.subtasks : []);
+          if (typeof t.progress !== 'undefined' && t.progress !== null) {
+            progressValue = Number(t.progress) || 0;
+          } else if (stages.length > 0) {
+            stagesCount = stages.length;
+            const sum = stages.reduce((acc: number, s: any) => acc + (Number(s.progress || 0)), 0);
+            avgProgress = Math.round(sum / stagesCount);
+            progressValue = avgProgress;
+          } else {
+            progressValue = Number(t.progress || 0);
+          }
+
           return (
             <div key={t._id || t.id}>
               <TileCard
                 title={t.title}
-                progress={Number(t.progress || 0)}
+                // If we computed an average from stages, prefer `avgProgress` so TileCard shows explanatory text.
+                {...(avgProgress !== undefined ? { avgProgress, stagesCount } : { progress: progressValue })}
                 timeline={timelineRange}
                 panelColor={statusText === 'completed' ? 'var(--color-dark)' : (statusText === 'requested' ? 'var(--color-pending)' : undefined)}
                 leftContent={<div>
@@ -63,7 +81,7 @@ export default function StaffTasksPage() {
                 </div>}
                 onClick={() => router.push('/staff/tasks/' + String(t._id || t.id))}
                 rightAction={<span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span>}
-                stagesCount={(t.stages || t.subtasks || []).length}
+                stagesCount={stagesCount}
               />
             </div>
           );

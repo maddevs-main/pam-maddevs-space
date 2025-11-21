@@ -9,12 +9,62 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query as any;
   if (!id) return res.status(400).json({ error: 'missing_id' });
 
-  const projId = new ObjectId(id as string);
+  let projId: any = null;
+  try {
+    projId = new ObjectId(id as string);
+  } catch (e) {
+    projId = null; // id is not a valid ObjectId
+  }
 
   if (req.method === 'GET') {
-    const project = await db.collection('projects').findOne({ _id: projId, tenantId: auth.tenantId });
-    if (!project) return res.status(404).json({ error: 'not_found' });
-    return res.json({ ok: true, project });
+    const role = auth.role as string;
+    const tenantId = auth.tenantId;
+    const userId = auth.userId;
+
+    // First, try to find within the tenant by ObjectId
+    let project: any = null;
+    if (projId && tenantId) {
+      project = await db.collection('projects').findOne({ _id: projId, tenantId });
+    }
+
+    // If not found, try string `id` within the tenant
+    if (!project && tenantId) {
+      project = await db.collection('projects').findOne({ id: id as any, tenantId });
+    }
+
+    // If still not found, in dev provide diagnostics for easier debugging
+    if (!project) {
+      if (process.env.NODE_ENV !== 'production') {
+        const foundById = projId ? await db.collection('projects').findOne({ _id: projId }) : null;
+        const foundByStringId = await db.collection('projects').findOne({ id: id as any });
+        return res.status(404).json({ error: 'not_found', debug: { auth, id, projId: !!projId, foundById: !!foundById, foundByIdTenantId: foundById?.tenantId || null, foundByStringId: !!foundByStringId } });
+      }
+      return res.status(404).json({ error: 'not_found' });
+    }
+
+    // Authorization: ensure the requesting user is allowed to view this project
+    // Admins must be in the same tenant
+    if (role === 'admin') {
+      if (project.tenantId !== tenantId) return res.status(404).json({ error: 'not_found' });
+      return res.json({ ok: true, project });
+    }
+
+    // Consumers can view their own projects
+    if (role === 'consumer') {
+      if (String(project.author?.id) !== String(userId)) return res.status(404).json({ error: 'not_found' });
+      return res.json({ ok: true, project });
+    }
+
+    // Staff can view projects where they are allocated or in staff list
+    if (role === 'staff') {
+      const allocated = Array.isArray(project.people_allocated) && project.people_allocated.includes(userId);
+      const inStaff = Array.isArray(project.staff) && project.staff.includes(userId);
+      if (!allocated && !inStaff) return res.status(404).json({ error: 'not_found' });
+      return res.json({ ok: true, project });
+    }
+
+    // Default deny
+    return res.status(404).json({ error: 'not_found' });
   }
 
   if (req.method === 'PATCH') {

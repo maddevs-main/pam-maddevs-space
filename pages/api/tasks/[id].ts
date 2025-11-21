@@ -13,7 +13,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
       const task = await db.collection('tasks').findOne({ _id: taskId, tenantId: auth.tenantId });
-      if (!task) return res.status(404).json({ error: 'not_found' });
+      if (!task) {
+        // In dev, provide diagnostics to help identify tenant/id mismatches
+        if (process.env.NODE_ENV !== 'production') {
+          const foundById = await db.collection('tasks').findOne({ _id: taskId });
+          const foundByStringId = await db.collection('tasks').findOne({ id: id as any });
+          return res.status(404).json({ error: 'not_found', debug: { auth, id, foundById: !!foundById, foundByIdTenantId: foundById?.tenantId || null, foundByStringId: !!foundByStringId } });
+        }
+        return res.status(404).json({ error: 'not_found' });
+      }
       return res.json({ ok: true, task });
     } catch (err: any) { console.error(err); return res.status(500).json({ error: 'server_error' }); }
   }

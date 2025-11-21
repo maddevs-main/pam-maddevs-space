@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 import styled from 'styled-components';
 
 const HeaderWrap = styled.header`
   padding: 20px 24px;
+  background: #000;
   border-bottom: 1px solid rgba(180,180,178,0.08);
   display: flex;
   align-items: center;
@@ -46,43 +48,32 @@ const LogoImg = styled.img`
 `;
 
 export default function Header({ title, initialUser }: { title?: string; initialUser?: any }) {
-  const [user, setUser] = useState<any | null>(initialUser || null);
+  const { data: session } = useSession();
+  const [user, setUser] = useState<any | null>(initialUser || (session ? (session.user as any) : null));
   const router = useRouter();
   useEffect(() => {
-    // If initialUser was provided from the server, skip client fetch.
+    // If initialUser provided, keep it. Otherwise derive from NextAuth session when available.
     if (initialUser) return;
-    let mounted = true;
-    async function fetchMe() {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (!mounted) return;
-        if (!res.ok) { setUser(null); return; }
-        const data = await res.json();
-        setUser(data.user || null);
-      } catch (err) {
-        setUser(null);
-      }
-    }
-    fetchMe();
-    return () => { mounted = false; };
-  }, [initialUser]);
+    setUser(session ? (session.user as any) : null);
+    // keep effect tied to session changes
+  }, [initialUser, session]);
 
   async function handleLogout() {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await signOut({ callbackUrl: '/auth/login' });
     } catch (err) {
-      // ignore
+      // fallback
+      setUser(null);
+      router.push('/auth/login');
     }
-    setUser(null);
-    router.push('/auth/login');
   }
 
   return (
     <HeaderWrap>
-      <Brand>
-        <LogoImg src="/trans-black.svg" alt="logo" />
-        <span>{title || 'PAM'}</span>
-      </Brand>
+          <Brand>
+            <LogoImg src="/trans-black.svg" alt="logo" />
+            <span>{title || 'maddevs'}</span>
+          </Brand>
       <Nav>
         <div />
       </Nav>

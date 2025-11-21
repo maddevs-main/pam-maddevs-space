@@ -215,6 +215,13 @@ function ProjectList({ refreshKey }: { refreshKey?: number }) {
       const [projRes, userRes] = await Promise.all([fetch('/api/projects'), fetch('/api/users/me')]);
       let projectsData: any[] = [];
       let userData: any = null;
+
+      // If either API returns 401/403, redirect to login
+      if (projRes.status === 401 || projRes.status === 403 || userRes.status === 401 || userRes.status === 403) {
+        window.location.href = '/auth/login';
+        return;
+      }
+
       if (projRes.ok) {
         const d = await projRes.json();
         projectsData = d.projects || [];

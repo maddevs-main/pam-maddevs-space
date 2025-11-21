@@ -16,7 +16,7 @@ export default function StaffProjectsPage() {
   async function fetchList() {
     setLoading(true);
     try {
-      const [projRes, userRes] = await Promise.all([fetch('/api/projects'), fetch('/api/auth/me')]);
+      const [projRes, userRes] = await Promise.all([fetch('/api/projects', { credentials: 'same-origin' }), fetch('/api/auth/me', { credentials: 'same-origin' })]);
       let projectsData: any[] = [];
       let userData: any = null;
       if (projRes.ok) {

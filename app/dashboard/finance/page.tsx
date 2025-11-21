@@ -22,6 +22,12 @@ export default function DashboardFinancePage() {
       let tasksData: any[] = [];
       let userData: any = null;
 
+      // If either API returns 401/403, redirect to login
+      if (projRes.status === 401 || projRes.status === 403 || userRes.status === 401 || userRes.status === 403) {
+        window.location.href = '/auth/login';
+        return;
+      }
+
       if (projRes.ok) {
         const d = await projRes.json();
         tasksData = d.projects || [];
@@ -147,7 +153,7 @@ export default function DashboardFinancePage() {
             const start = p.timeline?.from ? new Date(p.timeline.from) : null;
             const end = p.timeline?.to ? new Date(p.timeline.to) : null;
             const active = start && (!end ? now >= start : (now >= start && now <= end));
-
+            const waitingConfirmation = Array.isArray(p.milestones) && p.milestones.some((m:any) => m.confirmedByUser && !m.paidByAdmin);
             const total = Number(p.total_cost ?? p.total ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + (Number(m.amount)||0),0) : 0));
             const paid = Number(p.paid_amount ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + ((m.paidByAdmin ? (Number(m.amount)||0) : 0)),0) : 0));
             const pending = Math.max(0, total - paid);
@@ -168,12 +174,20 @@ export default function DashboardFinancePage() {
                 onClick={() => openTask(p._id)}
                 rightAction={<a onClick={(e:any)=>{ e.stopPropagation(); openTask(p._id); }} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></a>}
               >
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 16 }}>{`$${total.toLocaleString()}`}</div>
-                  <div style={{ marginTop: 6, display: 'flex', gap: 12 }}>
-                    <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
-                    <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
+                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 16 }}>{`$${total.toLocaleString()}`}</div>
+                    <div style={{ marginTop: 6, display: 'flex', gap: 12 }}>
+                      <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
+                      <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
+                    </div>
                   </div>
+                  {waitingConfirmation ? (
+                    <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block', marginRight: 8 }} />
+                      <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 12, fontWeight: 700 }}>Confirmation pending</div>
+                    </div>
+                  ) : null}
                 </div>
               </TileCard>
             );
@@ -218,8 +232,8 @@ export default function DashboardFinancePage() {
                             {m.confirmedByUser ? (
                               <span style={{ fontSize: 13, color: 'rgba(180,180,178,0.9)', padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}>Confirmed</span>
                             ) : (
-                              // only show confirm button for admin (tasks API may not support confirm for non-admins)
-                              (currentUser && (currentUser.role === 'admin' || currentUser.type === 'admin')) ? (
+                              // allow confirm for admins or the project owner (consumer)
+                              (currentUser && (currentUser.role === 'admin' || currentUser.type === 'admin' || String(selectedProject?.author?.id) === String(currentUser?.id))) ? (
                                 <button onClick={()=>confirmTaskMilestone(selectedProject._id, i)} style={{ padding: '8px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(180,180,178,0.06)', color: 'rgba(180,180,178,0.95)' }}>Confirm</button>
                               ) : (
                                 <button disabled style={{ padding: '8px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(180,180,178,0.04)', color: 'rgba(180,180,178,0.5)' }}>Confirm</button>

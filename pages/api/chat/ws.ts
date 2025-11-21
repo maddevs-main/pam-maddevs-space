@@ -15,8 +15,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   server.on('upgrade', (request: any, socket: any, head: any) => {
     // only accept upgrades on this path
-    if (request.url && request.url.startsWith('/api/chat/ws')) {
-      wss.handleUpgrade(request, socket, head, (ws) => {
+      if (request.url && request.url.startsWith('/api/chat/ws')) {
+      wss.handleUpgrade(request, socket, head, async (ws) => {
         // attach minimal auth info to ws client for server-side handling
         try {
           const payload = getUserFromRequest(request as any);

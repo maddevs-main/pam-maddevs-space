@@ -47,8 +47,11 @@ const StatusPill = styled.div`
   box-shadow: 0 6px 18px rgba(2,6,23,0.35);
 ` as any;
 
-export default function StaffTaskDetails({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function StaffTaskDetails({ params }: { params: any }) {
+  // In client components `params` may be a Promise in Next.js App Router.
+  // Unwrap it using React.use to avoid the sync-dynamic-apis error.
+  const resolvedParams = (React as any).use ? (React as any).use(params) : params;
+  const { id } = resolvedParams || {};
   const [task, setTask] = React.useState<any | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [user, setUser] = React.useState<any | null>(null);

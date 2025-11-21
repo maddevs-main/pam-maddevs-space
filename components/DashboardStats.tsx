@@ -256,23 +256,59 @@ function Donut({ pct=0, size=150, stroke=14, color=RGB_FINANCE_GREEN }:{pct?:num
 export default function DashboardStats({ data }:{ data?: any }) {
   // client-side projects state: use server-provided list if available, otherwise fetch client-side
   const [projectsListState, setProjectsListState] = React.useState<any[]>(data?.projects?.list || []);
+  const [currentUser, setCurrentUser] = React.useState<any | null>(data?.user || null);
+  const [financeState, setFinanceState] = React.useState<{total:number,paid:number}>({ total: Number(data?.finance?.total ?? 0), paid: Number(data?.finance?.paid ?? 0) });
   const projectsList: any[] = projectsListState;
 
-  // client-side fetch if no tasks were provided server-side (ensures consumer sees their tasks)
+  // client-side fetch: load current user first; for staff fetch `/api/tasks`, otherwise fetch `/api/projects`.
   React.useEffect(() => {
     if (projectsListState && projectsListState.length) return; // already have data
     let mounted = true;
     async function load() {
       try {
-          // consumer dashboard should query projects (not tasks)
-        const [projRes, userRes] = await Promise.all([fetch('/api/projects'), fetch('/api/users/me')]);
-        let projectsData: any[] = [];
+        const userRes = await fetch('/api/users/me');
         let userData: any = null;
-        if (projRes.ok) {
-          const d = await projRes.json(); projectsData = d.projects || [];
-        }
         if (userRes.ok) {
           const ud = await userRes.json(); userData = ud?.user || ud;
+          if (mounted) setCurrentUser(userData);
+        }
+
+        if (userData && (userData.role === 'staff' || userData.type === 'staff')) {
+          const taskRes = await fetch('/api/tasks');
+          let tasksData: any[] = [];
+          if (taskRes.ok) {
+            const td = await taskRes.json(); tasksData = td.tasks || [];
+          }
+          const filtered = filterTasksForUser(tasksData, userData);
+          if (mounted) setProjectsListState(filtered);
+          // fetch staff finance entries to populate finance totals for staff dashboards
+          try {
+            const finRes = await fetch('/api/staff-finance');
+            if (finRes.ok) {
+              const fd = await finRes.json();
+              const items = fd.items || [];
+              const aggTotal = items.reduce((s:any,it:any) => {
+                const ms = it.milestones || [];
+                const itemTotal = Number(it.total_cost ?? ms.reduce((ss:any,m:any)=> ss + (Number(m.amount)||0), 0)) || 0;
+                return s + itemTotal;
+              }, 0);
+              const aggPaid = items.reduce((s:any,it:any) => {
+                const ms = it.milestones || [];
+                const itemPaid = ms.reduce((ss:any,m:any) => ss + ((m && (m.paidByAdmin || m.done)) ? (Number(m.amount)||0) : 0), 0);
+                return s + itemPaid;
+              }, 0);
+              if (mounted) setFinanceState({ total: aggTotal, paid: aggPaid });
+            }
+          } catch (e) {
+            // ignore
+          }
+          return;
+        }
+
+        const projRes = await fetch('/api/projects');
+        let projectsData: any[] = [];
+        if (projRes.ok) {
+          const d = await projRes.json(); projectsData = d.projects || [];
         }
         const filtered = filterTasksForUser(projectsData, userData);
         if (mounted) setProjectsListState(filtered);
@@ -327,6 +363,11 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
   const selectedProject = projectsList.find(p => String(p._id) === String(selectedProjectId)) || null;
 
+  // determine role from passed or fetched data (fallback to consumer)
+  const role = currentUser?.role || data?.user?.role || data?.user?.type || 'consumer';
+  const isAdmin = Boolean(role === 'admin');
+  const isStaff = Boolean(role === 'staff');
+
   // per-project metrics (fall back to aggregated data)
   const projectTotal = selectedProject ? Number(selectedProject.total_cost ?? selectedProject.total ?? (selectedProject.milestones ? selectedProject.milestones.reduce((s:any,m:any)=> s + (Number(m.amount)||0),0) : 0)) : (data?.finance?.total ?? 0);
   const projectPaid = selectedProject ? Number(selectedProject.paid_amount ?? (selectedProject.milestones ? selectedProject.milestones.reduce((s:any,m:any)=> s + ((m.paidByAdmin ? (Number(m.amount)||0) : 0)),0) : 0)) : (data?.finance?.paid ?? 0);
@@ -336,8 +377,8 @@ export default function DashboardStats({ data }:{ data?: any }) {
   const aggTotal = projectsList.length ? projectsList.reduce((s:any,p:any)=> s + (Number(p.total_cost ?? p.total ?? (p.milestones ? p.milestones.reduce((ss:any,m:any)=> ss + (Number(m.amount)||0),0) : 0)) || 0), 0) : 0;
   const aggPaid = projectsList.length ? projectsList.reduce((s:any,p:any)=> s + (Number(p.paid_amount ?? (p.milestones ? p.milestones.reduce((ss:any,m:any)=> ss + ((m.paidByAdmin ? (Number(m.amount)||0) : 0)),0) : 0)) || 0), 0) : 0;
 
-  const total = selectedProject ? projectTotal : (projectsList.length ? aggTotal : (data?.finance?.total ?? 12500));
-  const paid = selectedProject ? projectPaid : (projectsList.length ? aggPaid : (data?.finance?.paid ?? 7200));
+  const total = selectedProject ? projectTotal : (isStaff ? financeState.total : (projectsList.length ? aggTotal : (data?.finance?.total ?? 12500)));
+  const paid = selectedProject ? projectPaid : (isStaff ? financeState.paid : (projectsList.length ? aggPaid : (data?.finance?.paid ?? 7200)));
   const pending = Math.max(0, total - paid);
   const pct = total > 0 ? Math.round((paid / total) * 100) : 0;
 
@@ -365,9 +406,6 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
   const amountReceived = paid; // use paid as amount received
   const amountPending = pending; // amount pending for consumer/admin context
-
-  // determine role from passed data (fallback to consumer)
-  const isAdmin = Boolean(data?.user?.isAdmin || data?.user?.role === 'admin');
 
   // card layout positions (matching the supplied sample); values change by role
   const cardLayout = isAdmin ? [
@@ -450,11 +488,11 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
       {/* Projects details card spanning three columns on wide screens */}
       <Card style={{ gridColumn: 'span 3', padding: '22px' }}>
-        <h3 style={{ margin: 0, color: '#f8f8f8' }}>Projects</h3>
+        <h3 style={{ margin: 0, color: '#f8f8f8' }}>{isStaff ? 'Tasks' : 'Projects'}</h3>
         <Small style={{ marginTop: 6, fontSize: 14 }}>Stages & progress</Small>
         <div style={{ height: 12 }} />
           <div style={{ marginBottom: 12 }}>
-          <Small>Top project avg</Small>
+          <Small>{isStaff ? 'Top task avg' : 'Top project avg'}</Small>
           <div style={{ height: 8 }} />
           <Bar style={{ height: 18 }}><BarFill w={topProjectAvg} color={RGB_STAGE_TOP_GREEN} /></Bar>
         </div>
@@ -480,10 +518,10 @@ export default function DashboardStats({ data }:{ data?: any }) {
         <Small style={{ marginTop: 6 }}>Overview</Small>
         <div style={{ height: 12 }} />
         <RadialWrap>
-            <Donut pct={projectPct} size={RADIAL_SIZE} stroke={RADIAL_STROKE} color={RGB_FINANCE_GREEN} />
+            <Donut pct={pct} size={RADIAL_SIZE} stroke={RADIAL_STROKE} color={RGB_FINANCE_GREEN} />
           <RadialInner>
-            <div style={{ fontSize: 18, color: '#f8f8f8' }}>{projectPct}%</div>
-            <Small style={{ marginTop: 6, color: '#f8f8f8' }}>${projectPaid.toLocaleString()}</Small>
+            <div style={{ fontSize: 18, color: '#f8f8f8' }}>{pct}%</div>
+            <Small style={{ marginTop: 6, color: '#f8f8f8' }}>${paid.toLocaleString()}</Small>
           </RadialInner>
         </RadialWrap>
       </CenterCard>
