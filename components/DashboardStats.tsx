@@ -3,22 +3,46 @@ import React from 'react';
 import styled from 'styled-components';
 import Card from './ui/Card';
 
+
+// Add missing styled components
+const Small = styled.div`
+  font-size: 13px;
+  color: rgba(248,248,248,0.75);
+`;
+
+const Bar = styled.div`
+  width: 100%;
+  height: 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+`;
+
+const BarFill = styled.div<{w:number, color:string}>`
+  height: 100%;
+  width: ${p => p.w + '%'};
+  background: ${p => p.color};
+  border-radius: 6px;
+  transition: width 0.4s cubic-bezier(.4,0,.2,1);
+`;
+
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
   align-items: start;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-
-  @media (max-width: 1280px) {
+  @media (min-width: 800px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
-  @media (max-width: 800px) {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
   }
 `;
 
@@ -27,24 +51,20 @@ const Frame = styled.div`
   border-radius: 15px;
   position: relative;
   overflow: hidden;
-  margin-bottom: 18px;
-  padding: 20px 28px;
-  min-height: 420px;
+  margin-bottom: 0.75rem;
+  padding: 22px;
+  min-height: 180px;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-
+  @media (min-width: 800px) {
+    padding: 22px;
+    min-height: 320px;
+  }
   @media (min-width: 1280px) {
-    min-height: 520px;
-  }
-  @media (max-width: 980px) {
-    padding: 14px;
-    min-height: 380px;
-  }
-  @media (max-width: 800px) {
-    padding: 10px 4px;
-    min-height: 220px;
+    min-height: 420px;
+    padding: 22px;
   }
 `;
 
@@ -52,7 +72,7 @@ const CardsWrap = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: ${160}px;
-  gap: 18px;
+  gap: 1rem;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
@@ -61,18 +81,18 @@ const CardsWrap = styled.div`
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
     grid-auto-rows: ${160}px;
-    gap: 12px;
+    gap: 0.75rem;
   }
   @media (max-width: 800px) {
     grid-auto-rows: 100px;
-    gap: 6px;
+    gap: 0.5rem;
   }
 `;
 
 const FrameGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 360px;
-  gap: 18px;
+  gap: 1rem;
   align-items: start;
   width: 100%;
   box-sizing: border-box;
@@ -84,26 +104,25 @@ const FrameGrid = styled.div`
   }
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 0.75rem;
   }
 `;
 
 const CardsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: ${160}px;
-  gap: 18px;
+  grid-template-columns: 1fr;
+  grid-auto-rows: 80px;
+  gap: 0.75rem;
   width: 100%;
   box-sizing: border-box;
-
-  @media (max-width: 980px) {
-    grid-template-columns: 1fr;
-    grid-auto-rows: ${160}px;
-    gap: 12px;
+  @media (min-width: 800px) {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 120px;
+    gap: 0.75rem;
   }
-  @media (max-width: 800px) {
-    grid-auto-rows: 110px;
-    gap: 8px;
+  @media (min-width: 1280px) {
+    grid-auto-rows: 160px;
+    gap: 1rem;
   }
 `;
 
@@ -144,24 +163,26 @@ const MeetingsBox = styled.div`
 const SmallCard = styled.div< { bg:string } >`
   position: relative;
   width: 100%;
-  height: ${CARD_HEIGHT}px;
+  height: 80px;
   background: ${p => p.bg};
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 8px 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   box-sizing: border-box;
-
-  @media (max-width: 980px) {
-    height: ${CARD_HEIGHT}px;
-    padding: 10px 8px;
+  font-size: 15px;
+  @media (min-width: 800px) {
+    height: 120px;
+    padding: 12px 12px;
+    font-size: 16px;
   }
-  @media (max-width: 800px) {
-    height: 90px;
-    padding: 6px 4px;
+  @media (min-width: 1280px) {
+    height: 160px;
+    padding: 14px 16px;
+    font-size: 17px;
   }
 `;
 
@@ -178,15 +199,16 @@ const CardBig = styled.div`
   color: #ffffff;
   font-weight: 800;
   line-height: 1;
-  font-size: clamp(22px, 5vw, 48px);
-  margin-top: 6px;
+  font-size: 18px;
+  margin-top: 4px;
   position: relative;
-
-  @media (max-width: 980px) {
-    font-size: clamp(16px, 6vw, 22px);
+  @media (min-width: 800px) {
+    font-size: 22px;
+    margin-top: 6px;
   }
-  @media (max-width: 800px) {
-    font-size: 16px;
+  @media (min-width: 1280px) {
+    font-size: clamp(22px, 5vw, 48px);
+    margin-top: 6px;
   }
 `;
 
@@ -203,25 +225,26 @@ const MetricCard = styled(Card)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 18px;
-  min-height: 120px;
+  padding: 22px;
+  min-height: 80px;
   width: 100%;
   box-sizing: border-box;
-
-  @media (max-width: 800px) {
-    padding: 10px 6px;
-    min-height: 80px;
+  font-size: 15px;
+  @media (min-width: 800px) {
+    padding: 22px;
+    min-height: 120px;
+    font-size: 16px;
   }
 `;
 
 const BigNumber = styled.div`
-  font-size: 44px;
+  font-size: 22px;
   font-weight: 900;
   line-height: 1;
   color: #f8f8f8;
   word-break: break-word;
-  @media (max-width: 800px) {
-    font-size: 22px;
+  @media (min-width: 800px) {
+    font-size: 44px;
   }
 `;
 
@@ -267,124 +290,28 @@ const RadialInner = styled.div`
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 `;
 
-const Row = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 12px;
+const ProjectProgressCard = styled(Card)`
+  padding: 22px;
+  grid-column: 1 / -1;
+  @media (min-width: 1280px) {
+    grid-column: span 3;
+  }
 `;
 
-const Bar = styled.div`
-  height: 14px;
-  background: rgba(59, 59, 59, 1);
-  border-radius: 999px;
-  width: 100%;
-  overflow: hidden;
+const FinanceMetricCard = styled(MetricCard)`
+  align-items: flex-start;
+  grid-column: 1 / -1;
+  @media (min-width: 1280px) {
+    grid-column: span 1;
+  }
 `;
 
-const BarFill = styled.div<{w:number,color?:string}>`
-  height: 100%;
-  width: ${p => p.w}%;
-  background: ${p => p.color || RGB_STAGE_BLUE}; /* default to blue for progress bars */
-  border-radius: 999px;
-  transition: width 300ms ease;
-`;
-
-const Small = styled.div`
-  font-size: 13px;
-  color: rgba(248,248,248,0.75);
-`;
-
-function Donut({ pct=0, size=150, stroke=14, color=RGB_FINANCE_GREEN }:{pct?:number,size?:number,stroke?:number,color?:string}){
-  const radius = (size - stroke) / 2;
-  const c = 2 * Math.PI * radius;
-  const dash = Math.max(0, Math.min(100, pct)) / 100 * c;
-
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <g transform={`translate(${size/2},${size/2})`}>
-        {/* background ring */}
-        <circle r={radius} fill="none" stroke="rgba(0,0,0,0.04)" strokeWidth={stroke} />
-        {/* foreground ring with flat color, rounded linecap for playful look */}
-        <circle r={radius} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${dash} ${c-dash}`} transform={`rotate(-90)`} />
-      </g>
-    </svg>
-  );
-}
-
-export default function DashboardStats({ data }:{ data?: any }) {
-  // client-side projects state: use server-provided list if available, otherwise fetch client-side
-  const [projectsListState, setProjectsListState] = React.useState<any[]>(data?.projects?.list || []);
-  const [currentUser, setCurrentUser] = React.useState<any | null>(data?.user || null);
-  const [financeState, setFinanceState] = React.useState<{total:number,paid:number}>({ total: Number(data?.finance?.total ?? 0), paid: Number(data?.finance?.paid ?? 0) });
-  const projectsList: any[] = projectsListState;
-
-  // client-side fetch: load current user first; for staff fetch `/api/tasks`, otherwise fetch `/api/projects`.
-  React.useEffect(() => {
-    if (projectsListState && projectsListState.length) return; // already have data
-    let mounted = true;
-    async function load() {
-      try {
-        const userRes = await fetch('/api/users/me');
-        let userData: any = null;
-        if (userRes.ok) {
-          const ud = await userRes.json(); userData = ud?.user || ud;
-          if (mounted) setCurrentUser(userData);
-        }
-
-        if (userData && (userData.role === 'staff' || userData.type === 'staff')) {
-          const taskRes = await fetch('/api/tasks');
-          let tasksData: any[] = [];
-          if (taskRes.ok) {
-            const td = await taskRes.json(); tasksData = td.tasks || [];
-          }
-          const filtered = filterTasksForUser(tasksData, userData);
-          if (mounted) setProjectsListState(filtered);
-          // fetch staff finance entries to populate finance totals for staff dashboards
-          try {
-            const finRes = await fetch('/api/staff-finance');
-            if (finRes.ok) {
-              const fd = await finRes.json();
-              const items = fd.items || [];
-              const aggTotal = items.reduce((s:any,it:any) => {
-                const ms = it.milestones || [];
-                const itemTotal = Number(it.total_cost ?? ms.reduce((ss:any,m:any)=> ss + (Number(m.amount)||0), 0)) || 0;
-                return s + itemTotal;
-              }, 0);
-              const aggPaid = items.reduce((s:any,it:any) => {
-                const ms = it.milestones || [];
-                const itemPaid = ms.reduce((ss:any,m:any) => ss + ((m && (m.paidByAdmin || m.done)) ? (Number(m.amount)||0) : 0), 0);
-                return s + itemPaid;
-              }, 0);
-              if (mounted) setFinanceState({ total: aggTotal, paid: aggPaid });
-            }
-          } catch (e) {
-            // ignore
-          }
-          return;
-        }
-
-        const projRes = await fetch('/api/projects');
-        let projectsData: any[] = [];
-        if (projRes.ok) {
-          const d = await projRes.json(); projectsData = d.projects || [];
-        }
-        const filtered = filterTasksForUser(projectsData, userData);
-        if (mounted) setProjectsListState(filtered);
-      } catch (e) {
-        // ignore
-      }
-    }
-    load();
-    return () => { mounted = false; };
-  }, []);
-
-  function filterTasksForUser(tasks:any[], user:any) {
-    if (!user) return tasks;
-    const uid = user.id || user._id || user.userId || user?.sub;
-    const role = user.role || user?.type || 'consumer';
-    if (role === 'admin') return tasks;
+// Move all logic into the DashboardStats function
+function DashboardStats({ data, currentUser }) {
+  // Helper to filter tasks for user
+  function filterTasksForUser(tasks, user) {
+    const uid = user?._id || user?.id || user?.userId || user?.email || null;
+    const role = user?.role || user?.type || 'consumer';
     if (role === 'staff') {
       return tasks.filter(t => {
         const people = t.people_allocated || t.peopleAllocated || t.assignedTo || t.staff || [];
@@ -401,6 +328,11 @@ export default function DashboardStats({ data }:{ data?: any }) {
     }
     return tasks.filter(t => String(t.author?.id || t.author?._id) === String(uid));
   }
+
+  // State for projects and finance
+  const [projectsList, setProjectsList] = React.useState(data?.projects?.list || []);
+  const [financeState, setFinanceState] = React.useState({ total: data?.finance?.total ?? 0, paid: data?.finance?.paid ?? 0 });
+
   // compute active projects based on timeline
   const now = new Date();
   const activeProjectsList = projectsList.filter(p => {
@@ -469,19 +401,19 @@ export default function DashboardStats({ data }:{ data?: any }) {
 
   // card layout positions (matching the supplied sample); values change by role
   const cardLayout = isAdmin ? [
-    { key: 'activeProjects', left: 40, top: 42, bg: 'rgba(4,34,90,0.60)', label: 'ACTIVE PROJECTS', value: `${activeProjects}` },
-    { key: 'totalPending', left: 323, top: 42, bg: 'rgba(22,86,22,0.30)', label: 'TOTAL PENDING', value: `$${amountPending.toLocaleString()}` },
-    { key: 'upcoming', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'UPCOMING MEETINGS', value: `${meetings.length}` },
-    { key: 'milestones', left: 323, top: 161, bg: 'rgba(255,0,0,0.12)', label: 'ACTIVE MILESTONES', value: `${activeMilestones}` },
-    { key: 'placeholder', left: 40, top: 282, bg: 'rgba(0,0,0,0.06)', label: '', value: `` },
+    { key: 'activeProjects', left: 40, top: 42, bg: 'rgba(4,34,90,0.60)', label: 'ACTIVE PROJECTS', value: String(activeProjects) },
+    { key: 'totalPending', left: 323, top: 42, bg: 'rgba(22,86,22,0.30)', label: 'TOTAL PENDING', value: '$' + amountPending.toLocaleString() },
+    { key: 'upcoming', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'UPCOMING MEETINGS', value: String(meetings.length) },
+    { key: 'milestones', left: 323, top: 161, bg: 'rgba(255,0,0,0.12)', label: 'ACTIVE MILESTONES', value: String(activeMilestones) },
+    { key: 'placeholder', left: 40, top: 282, bg: 'rgba(0,0,0,0.06)', label: '', value: '' },
   ] : [
     // consumer view
     // replace the top card value with the selected project's avg and name
-    { key: 'topAvg', left: 323, top: 42, bg: 'rgba(255,0,0,0.26)', label: selectedProject ? 'SELECTED PROJECT AVG' : 'TOP PROJECT AVG', value: `${selectedProject ? (selectedProject.stages && selectedProject.stages.length ? Math.round(selectedProject.stages.reduce((a:any,b:any)=>a+Number(b.progress||0),0)/selectedProject.stages.length) : 0) : topProjectAvg}%`, sub: selectedProject ? (selectedProject.title || topProjectName) : topProjectName },
-    { key: 'liveProjects', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'LIVE PROJECTS', value: `${activeProjects}`, sub: activeProjectName },
-    { key: 'upcoming', left: 323, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'UPCOMING MEETINGS', value: `${meetings.length}` },
-    { key: 'milestones', left: 40, top: 282, bg: 'rgba(22,86,22,0.30)', label: 'ACTIVE MILESTONES', value: `${activeMilestones}`, sub: activeProjectName },
-    { key: 'pending', left: 323, top: 282, bg: 'rgba(22,86,22,0.30)', label: 'AMOUNT PENDING', value: `$${amountPending.toLocaleString()}` },
+    { key: 'topAvg', left: 323, top: 42, bg: 'rgba(255,0,0,0.26)', label: selectedProject ? 'SELECTED PROJECT AVG' : 'TOP PROJECT AVG', value: ((selectedProject ? (selectedProject.stages && selectedProject.stages.length ? Math.round(selectedProject.stages.reduce((a:any,b:any)=>a+Number(b.progress||0),0)/selectedProject.stages.length) : 0) : topProjectAvg) + '%'), sub: selectedProject ? (selectedProject.title || topProjectName) : topProjectName },
+    { key: 'liveProjects', left: 40, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'LIVE PROJECTS', value: String(activeProjects), sub: activeProjectName },
+    { key: 'upcoming', left: 323, top: 161, bg: 'rgba(4,34,90,0.60)', label: 'UPCOMING MEETINGS', value: String(meetings.length) },
+    { key: 'milestones', left: 40, top: 282, bg: 'rgba(22,86,22,0.30)', label: 'ACTIVE MILESTONES', value: String(activeMilestones), sub: activeProjectName },
+    { key: 'pending', left: 323, top: 282, bg: 'rgba(22,86,22,0.30)', label: 'AMOUNT PENDING', value: '$' + amountPending.toLocaleString() },
   ];
 
   return (
@@ -547,7 +479,7 @@ export default function DashboardStats({ data }:{ data?: any }) {
       </div>
 
       {/* Projects details card spanning three columns on wide screens */}
-      <Card style={{ gridColumn: 'span 3', padding: '22px' }}>
+      <ProjectProgressCard>
         <h3 style={{ margin: 0, color: '#f8f8f8' }}>{isStaff ? 'Tasks' : 'Projects'}</h3>
         <Small style={{ marginTop: 6, fontSize: 14 }}>Stages & progress</Small>
         <div style={{ height: 12 }} />
@@ -568,21 +500,20 @@ export default function DashboardStats({ data }:{ data?: any }) {
             <Small style={{ marginTop: 8 }}>{s.desc}</Small>
           </div>
         ))}
-      </Card>
-
-      
+      </ProjectProgressCard>
 
       {/* Finance stats card spanning one column */}
-      <MetricCard>
+      <FinanceMetricCard>
         <h3 style={{ margin: 0, color: '#f8f8f8' }}>Finance</h3>
         <MetricLabel>Total Received</MetricLabel>
-        <BigNumber>${paid.toLocaleString()}</BigNumber>
+        <BigNumber>{'$' + paid.toLocaleString()}</BigNumber>
         <MetricLabel style={{ marginTop: 12 }}>Total Pending</MetricLabel>
-        <BigNumber style={{ color: '#eab308' }}>${pending.toLocaleString()}</BigNumber>
-        <MetricSub style={{ marginTop: 10 }}>You have received {pct}% of your total</MetricSub>
-      </MetricCard>
-      
+        <BigNumber style={{ color: '#eab308' }}>{'$' + pending.toLocaleString()}</BigNumber>
+        <MetricSub style={{ marginTop: 10 }}>{'You have received ' + pct + '% of your total'}</MetricSub>
+      </FinanceMetricCard>
     </Grid>
     </>
   );
 }
+
+export default DashboardStats;

@@ -4,14 +4,21 @@ import styled from 'styled-components';
 import Card from './ui/Card';
 
 const Container = styled.div<{full?:boolean}>`
-  max-width: ${p => p.full ? '100%' : '1100px'};
+  max-width: 100%;
   margin: 0 auto;
-  /* Uniform padding across main pages */
-  padding: 24px;
+  padding: 12px 0;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
+  @media (min-width: 600px) {
+    max-width: 600px;
+    padding: 18px 0;
+  }
+  @media (min-width: 1100px) {
+    max-width: 1100px;
+    padding: 24px;
+  }
 `;
 
 const Header = styled.header`
@@ -50,8 +57,13 @@ const Content = styled.main`
   display: block;
   min-width: 0;
   overflow-x: hidden;
-  /* slightly larger, uniform vertical spacing */
-  > * + * { margin-top: 20px; }
+  width: 100%;
+  box-sizing: border-box;
+  > * + * { margin-top: 16px; }
+  @media (min-width: 600px) {
+    width: 100%;
+    > * + * { margin-top: 20px; }
+  }
 `;
 
 export default function PageShell({ title, subtitle, children, fullWidth = true, actions, preTitle }: { title?: string, subtitle?: string, children?: React.ReactNode, fullWidth?: boolean, actions?: React.ReactNode, preTitle?: React.ReactNode }) {

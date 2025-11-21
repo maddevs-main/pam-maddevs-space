@@ -33,12 +33,25 @@ export const authOptions = {
     maxAge: 6 * 24 * 60 * 60, // 6 days
     updateAge: 24 * 60 * 60,  // Refresh session every 24 hours
   },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        domain: '.maddevs.space',
+        path: '/',
+      },
+    },
+  },
   jwt: { /* use default */ },
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev_nextauth_secret',
   callbacks: {
     async jwt({ token, user }) {
       // Always sync user fields on sign in or token refresh
       if (user) {
+        token.id = (user as any).id;
         token.userId = (user as any).id;
         token.role = (user as any).role;
         token.tenantId = (user as any).tenantId;
@@ -49,6 +62,7 @@ export const authOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
+        session.user.id = token.id;
         (session.user as any).id = (token as any).userId;
         (session.user as any).role = (token as any).role;
         (session.user as any).tenantId = (token as any).tenantId;
