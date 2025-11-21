@@ -208,7 +208,7 @@ export default function DashboardShell({ children, active }: { children: React.R
       <Sidebar collapsed={collapsed}>
         <CollapseToggle onClick={toggleCollapse} aria-pressed={collapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} $rotated={!!panelOpen}>
           {collapsed ? (
-            <img src="/favicon.svg" alt="Open sidebar" className="svgIcon" />
+            <img src="/hamburger.svg" alt="Open sidebar" className="svgIcon" />
           ) : (
             /* intentionally show no SVG when expanded per request */
             <div style={{ width: '100%', height: 'var(--sidebar-top-height)' }} />
