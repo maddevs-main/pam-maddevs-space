@@ -205,16 +205,15 @@ export default function LoginPage() {
     setTimeout(()=>setShowNotification(false), 3000);
   };
 
-  // Progressive enhancement: intercept the form submit in JS, POST via fetch,
-  // then poll /api/auth/me until the server-side cookie is usable before redirecting.
-  // If JS is disabled, the form will fall back to a normal HTML POST (method/action present).
+
+  // Use NextAuth client session for redirect after sign-in, fallback to cookie polling only if session is not detected
+  const { data: session, status } = require('next-auth/react').useSession();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     setRetry(false);
     try {
-      // Use NextAuth signIn with credentials provider. We use redirect: false and handle client-side navigation.
       const res: any = await signIn('credentials', { redirect: false, email, password });
       if (!res || res.error) {
         setError(res?.error === 'CredentialsSignin'
@@ -225,38 +224,27 @@ export default function LoginPage() {
         return;
       }
 
-      // signIn succeeded client-side, but NextAuth sets an HttpOnly cookie on the response.
-      // The server-side session may not be immediately available to our server-rendered layouts,
-      // so poll `/api/auth/me` (which uses getServerSession) until the session is visible, then redirect
-      // to the appropriate dashboard based on role.
-      const maxAttempts = 12; // ~ 2.4s
-      const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
-      let attempts = 0;
-      let foundUser: any = null;
-      while (attempts < maxAttempts) {
+      // If signIn succeeded, immediately route to dashboard based on credentials
+      // NextAuth credentials provider returns user role in session after login
+      // Try to get user role from session or fallback to /api/auth/me
+      let dest = '/dashboard';
+      let userRole = null;
+      if (session && session.user && session.user.role) {
+        userRole = session.user.role;
+      } else {
+        // Fallback: fetch user from /api/auth/me
         try {
           const check = await fetch('/api/auth/me', { credentials: 'same-origin' });
           if (check.ok) {
             const data = await check.json();
-            if (data && data.user) { foundUser = data.user; break; }
+            if (data && data.user && data.user.role) userRole = data.user.role;
           }
         } catch (e) { /* ignore transient errors */ }
-        attempts += 1;
-        await delay(200);
       }
-
-      if (foundUser) {
-        let dest = '/dashboard';
-        if (foundUser.role === 'admin') dest = '/admin';
-        router.replace(dest);
-        return;
-      }
-
-      // Fallback: keep the user on the login page and surface an error
-      setError('We couldn’t confirm your session after signing in. This may be a network or server issue. Please try again, or refresh the page.');
-      setLoading(false);
-      setRetry(true);
+      if (userRole === 'admin') dest = '/admin';
+      router.replace(dest);
       return;
+
     } catch (err) {
       console.error(err);
       setError('Something went wrong while signing you in. Please try again.');

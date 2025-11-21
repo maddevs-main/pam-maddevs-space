@@ -45,7 +45,28 @@ export async function getUserFromRequestAsync(req: any) {
 
 export function requireAuth(handler: any, roles?: string[]) {
   return async (req: NextApiRequest, res: NextApiResponse) => {
-    const t = await resolveTokenFromReq(req as any);
+    let t = await resolveTokenFromReq(req as any);
+    // Fallback: try Authorization header if no cookie token
+    if (!t && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        try {
+          const jwt = authHeader.slice(7);
+          const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
+          // Use next-auth/jwt to decode
+          const { getToken } = require('next-auth/jwt');
+          t = await getToken({ token: jwt, secret });
+        } catch (e) {
+          if (process.env.NODE_ENV === 'production') console.error('[requireAuth] Bearer token fallback failed:', e);
+        }
+      }
+    }
+    // Diagnostics for production
+    if (process.env.NODE_ENV === 'production') {
+      console.log('[requireAuth] cookies:', req.headers.cookie);
+      console.log('[requireAuth] authorization:', req.headers.authorization);
+      console.log('[requireAuth] resolved token:', t);
+    }
     if (!t) return res.status(401).json({ error: 'unauthenticated' });
     const payload = { userId: (t as any).userId || (t as any).sub || null, role: (t as any).role || null, tenantId: (t as any).tenantId || null };
     if (roles && roles.length > 0 && !roles.includes(payload.role)) return res.status(403).json({ error: 'forbidden' });
