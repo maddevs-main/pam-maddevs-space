@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../lib/mongodb';
-import { requireAuth } from '../../../lib/auth';
+import { requireJwtAuth } from '../../../lib/auth';
 
 // Returns list of users for admin (with profilePic), or for non-admin returns the admin contact
-export default requireAuth(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default requireJwtAuth(async function handler(req: NextApiRequest, res: NextApiResponse) {
   const auth: any = (req as any).auth;
   if (req.method !== 'GET') return res.status(405).end();
 

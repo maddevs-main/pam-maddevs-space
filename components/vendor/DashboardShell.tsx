@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import Link from 'next/link';
@@ -179,8 +178,17 @@ const Main = styled.main`
 `;
 
 export default function DashboardShell({ children, active }: { children: React.ReactNode; active?: string }) {
-  const { data: session } = useSession();
-  const role = (session && (session as any).user && (session as any).user.role) ? (session as any).user.role : null;
+  // Get role from JWT in localStorage
+  let role: string | null = null;
+  if (typeof window !== 'undefined') {
+    const token = window.localStorage.getItem('jwt');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        role = payload.role || null;
+      } catch {}
+    }
+  }
   const pathname = usePathname();
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
@@ -213,12 +221,8 @@ export default function DashboardShell({ children, active }: { children: React.R
   }, []);
 
   async function handleLogout() {
-    try {
-      await signOut({ callbackUrl: '/auth/login' });
-    } catch (err) {
-      // fallback: redirect
-      if (typeof window !== 'undefined') window.location.href = '/auth/login';
-    }
+    window.localStorage.removeItem('jwt');
+    if (typeof window !== 'undefined') window.location.href = '/auth/login';
   }
 
   function toggleCollapse() {
@@ -236,7 +240,7 @@ export default function DashboardShell({ children, active }: { children: React.R
     try { localStorage.setItem('sidebar_collapsed', '1'); } catch (e) {}
   }
 
-  // role is derived from NextAuth session via `useSession`
+  // role is derived from JWT in localStorage
 
   return (
     <Shell>

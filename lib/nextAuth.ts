@@ -35,13 +35,17 @@ export const authOptions = {
   },
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name: process.env.NODE_ENV === 'production'
+        ? `__Secure-next-auth.session-token`
+        : `next-auth.session-token`,
       options: {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        domain: '.maddevs.space',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         path: '/',
+        domain: process.env.NODE_ENV === 'production'
+          ? process.env.NEXTAUTH_COOKIE_DOMAIN
+          : undefined,
       },
     },
   },

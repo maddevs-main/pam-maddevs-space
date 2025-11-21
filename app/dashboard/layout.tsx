@@ -1,19 +1,15 @@
 import Header from '../../components/Header';
 import DashboardShell from '../../components/vendor/DashboardShell';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/nextAuth';
+import { getUserFromRequestAsync } from '../../lib/auth';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions as any) as { user?: any };
-  if (!session || !session.user) redirect('/auth/login');
-
-  // Pass minimal user payload to Header so it doesn't have to fetch immediately on the client
-  const initialUser = { id: (session.user as any).id, role: (session.user as any).role, tenantId: (session.user as any).tenantId };
-
+  // Use JWT from Authorization header (for SSR, you may need to pass it via cookies or headers)
+  const user = await getUserFromRequestAsync({ headers: { authorization: '' } }); // TODO: Pass JWT from SSR context
+  if (!user) redirect('/auth/login');
+  const initialUser = { id: user.userId, role: user.role, tenantId: user.tenantId };
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header is a client component; provide initialUser to avoid a client-side fetch and UI flash */}
       <Header title="maddevs" initialUser={initialUser} />
       <DashboardShell>
         {children}

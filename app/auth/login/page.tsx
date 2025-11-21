@@ -4,7 +4,7 @@ import Header from '../../../components/Header';
 import dynamic from 'next/dynamic';
 const LoadingScreen = dynamic(() => import('../../../components/LoadingScreen'), { ssr: false });
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+// import { signIn } from 'next-auth/react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -206,45 +206,33 @@ export default function LoginPage() {
   };
 
 
-  // Use NextAuth client session for redirect after sign-in, fallback to cookie polling only if session is not detected
-  const { data: session, status } = require('next-auth/react').useSession();
+  // Custom JWT login flow
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     setRetry(false);
     try {
-      const res: any = await signIn('credentials', { redirect: false, email, password });
-      if (!res || res.error) {
-        setError(res?.error === 'CredentialsSignin'
+      const res = await fetch('/api/auth/local-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok || !data.token) {
+        setError(data?.error === 'invalid_credentials'
           ? 'The email or password you entered is incorrect. Please check and try again.'
-          : (res?.error || 'We couldn’t log you in. Please try again.'));
+          : (data?.error || 'We couldn’t log you in. Please try again.'));
         setLoading(false);
         setRetry(true);
         return;
       }
-
-      // If signIn succeeded, immediately route to dashboard based on credentials
-      // NextAuth credentials provider returns user role in session after login
-      // Try to get user role from session or fallback to /api/auth/me
-      let dest = '/dashboard';
-      let userRole = null;
-      if (session && session.user && session.user.role) {
-        userRole = session.user.role;
-      } else {
-        // Fallback: fetch user from /api/auth/me
-        try {
-          const check = await fetch('/api/auth/me', { credentials: 'same-origin' });
-          if (check.ok) {
-            const data = await check.json();
-            if (data && data.user && data.user.role) userRole = data.user.role;
-          }
-        } catch (e) { /* ignore transient errors */ }
-      }
-      if (userRole === 'admin') dest = '/admin';
-      router.replace(dest);
-      return;
-
+      // Store JWT in localStorage
+      window.localStorage.setItem('pam_jwt', data.token);
+      // Optionally store user info
+      window.localStorage.setItem('pam_user', JSON.stringify(data.user));
+      // Redirect to dashboard
+      router.replace('/dashboard');
     } catch (err) {
       console.error(err);
       setError('Something went wrong while signing you in. Please try again.');

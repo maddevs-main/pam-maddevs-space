@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAuth } from '../../../lib/auth';
+import { requireJwtAuth } from '../../../lib/auth';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 import sanitizeHtml from 'sanitize-html';
@@ -109,4 +109,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default requireAuth(handler, ['admin']);
+export default requireJwtAuth(handler, ['admin']);

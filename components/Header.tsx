@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
 import styled from 'styled-components';
 
 const HeaderWrap = styled.header`
@@ -48,24 +47,24 @@ const LogoImg = styled.img`
 `;
 
 export default function Header({ title, initialUser }: { title?: string; initialUser?: any }) {
-  const { data: session } = useSession();
-  const [user, setUser] = useState<any | null>(initialUser || (session ? (session.user as any) : null));
+  const [user, setUser] = useState<any | null>(initialUser || null);
   const router = useRouter();
   useEffect(() => {
-    // If initialUser provided, keep it. Otherwise derive from NextAuth session when available.
     if (initialUser) return;
-    setUser(session ? (session.user as any) : null);
-    // keep effect tied to session changes
-  }, [initialUser, session]);
+    // Try to get user from JWT in localStorage
+    const token = window.localStorage.getItem('jwt');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUser({ id: payload.userId, role: payload.role, tenantId: payload.tenantId, name: payload.name, email: payload.email });
+      } catch {}
+    }
+  }, [initialUser]);
 
   async function handleLogout() {
-    try {
-      await signOut({ callbackUrl: '/auth/login' });
-    } catch (err) {
-      // fallback
-      setUser(null);
-      router.push('/auth/login');
-    }
+    window.localStorage.removeItem('jwt');
+    setUser(null);
+    router.push('/auth/login');
   }
 
   return (

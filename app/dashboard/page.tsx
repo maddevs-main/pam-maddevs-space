@@ -3,8 +3,7 @@ import DashboardStats from '../../components/DashboardStats';
 import CalendarAction from '../../components/CalendarAction';
 import DashboardGreeting from '../../components/DashboardGreeting';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/nextAuth';
+import { getUserFromRequestAsync } from '../../lib/auth';
 import connectToDatabase from '../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { sanitizeList, sanitizeDoc } from '../../lib/sanitize';
@@ -13,20 +12,19 @@ import { sanitizeList, sanitizeDoc } from '../../lib/sanitize';
 export default async function DashboardPage() {
   // Fetch user-specific data server-side where possible
 
-  // Use NextAuth server session directly (avoids internal API fetches that don't forward cookies)
-  const session: any = await getServerSession(authOptions as any);
-  if (!session || !session.user || !(session.user as any).id) {
+  // Use JWT from Authorization header (for SSR, you may need to pass it via cookies or headers)
+  const user = await getUserFromRequestAsync({ headers: { authorization: '' } }); // TODO: Pass JWT from SSR context
+  if (!user || !user.userId) {
     redirect('/auth/login');
   }
-
-  const auth = { userId: (session.user as any).id as string, role: (session.user as any).role as string, tenantId: (session.user as any).tenantId as string };
+  const auth = { userId: user.userId, role: user.role, tenantId: user.tenantId };
 
   const { db } = await connectToDatabase();
 
-  // Load user
+  // Load user profile
   const userDoc = await db.collection('users').findOne({ _id: new ObjectId(auth.userId) }, { projection: { passwordHash: 0 } });
   if (!userDoc) redirect('/auth/login');
-  const user = { id: userDoc._id.toString(), email: userDoc.email, name: userDoc.name, role: userDoc.role, tenantId: userDoc.tenantId };
+  const userProfile = { id: userDoc._id.toString(), email: userDoc.email, name: userDoc.name, role: userDoc.role, tenantId: userDoc.tenantId };
 
   // Load projects based on role
   let projectQuery: any = { tenantId: auth.tenantId };

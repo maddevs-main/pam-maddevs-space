@@ -302,10 +302,13 @@ export default function RegisterPage() {
         body: JSON.stringify({ name, email, password, organisation, inviteCode }),
       });
       const data = await res.json();
-      if (!res.ok) {
+      if (!res.ok || !data.ok || !data.token) {
         setTempNotification(data?.message || 'Registration failed', true);
         return;
       }
+      // Store JWT in localStorage
+      window.localStorage.setItem('pam_jwt', data.token);
+      window.localStorage.setItem('pam_user', JSON.stringify(data.user));
       setTempNotification('Registration successful!', false);
       // clear fields
       setName('');
@@ -314,8 +317,8 @@ export default function RegisterPage() {
       setConfirmPassword('');
       setOrganisation('');
       setInviteCode('');
-      // optional: redirect to login after small delay
-      setTimeout(() => router.push('/auth/login'), 900);
+      // redirect to dashboard after small delay
+      setTimeout(() => router.replace('/dashboard'), 900);
     } catch (err) {
       console.error(err);
       setTempNotification('Registration failed', true);
