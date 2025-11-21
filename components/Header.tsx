@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const HeaderWrap = styled.header`
   padding: 20px 24px;
-  background: #000;
+  background: #191818;
   border-bottom: 1px solid rgba(180,180,178,0.08);
   display: flex;
   align-items: center;
@@ -70,10 +70,12 @@ export default function Header({ title, initialUser }: { title?: string; initial
 
   return (
     <HeaderWrap>
-          <Brand>
-            <LogoImg src="/trans-black.svg" alt="logo" />
-            <span>{title || 'maddevs'}</span>
-          </Brand>
+      <a href="https://maddevs.space" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+        <Brand>
+          <LogoImg src="/trans-black.svg" alt="logo" />
+          <span>{title || 'maddevs'}</span>
+        </Brand>
+      </a>
       <Nav>
         <div />
       </Nav>

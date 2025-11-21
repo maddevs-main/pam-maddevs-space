@@ -14,7 +14,7 @@ const Overlay = styled.div`
 `;
 
 const Panel = styled.div<{ $panelColor?: string; $borderColor?: string }>`
-  background: ${p => p.$panelColor || 'rgba(5,5,5,0.80)'};
+  background: ${p => p.$panelColor || '#191818'};
   border-radius: 15px;
   width: 720px;
   max-width: calc(100vw - 24px);

@@ -9,12 +9,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
         <meta name="theme-color" content="#1A1A1A" />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        {/* Use client component for loader logic */}
+        <SessionLoaderWrapper>
+          <Providers>{children}</Providers>
+        </SessionLoaderWrapper>
       </body>
     </html>
   );
 }
+
+// Import client loader wrapper
+import SessionLoaderWrapper from '../components/SessionLoaderWrapper';
