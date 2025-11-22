@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import Link from 'next/link';
@@ -11,7 +12,7 @@ const Shell = styled.div`
   min-height: 100vh;
   max-height: 100vh;
   --sidebar-top-height: 120px;
-  --nav-item-size: 60px; /* controls icon size, label size and row height so they match */
+  --nav-item-size: 48px; /* controls icon size, label size and row height so they match */
   color: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.light) || '#F1F1F1'};
   min-width: 0;
   overflow: hidden;
@@ -19,8 +20,9 @@ const Shell = styled.div`
 
 const Sidebar = styled.aside<{ collapsed?: boolean }>`
   --sidebar-collapsed: ${(p:any) => (p.collapsed ? 1 : 0)};
-  flex-shrink: 0;
   width: 88px;
+  min-width: 0;
+  max-width: 100vw;
   background: #786143ff;
   border-right: 1px solid rgba(0,0,0,0.08);
   padding: 18px 10px;
@@ -30,20 +32,23 @@ const Sidebar = styled.aside<{ collapsed?: boolean }>`
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
+
 `;
 
 const Expander = styled.aside`
-  flex-shrink: 0;
-  width: clamp(240px, 30vw, 320px);
+  width: 320px;
+  min-width: 0;
+  max-width: 100vw;
   background: #d8c0a7ff;
   border-right: 1px solid rgba(0,0,0,0.06);
-  padding: 18px 10px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
+
 `;
 
 const ExpanderFooter = styled.div`
@@ -52,18 +57,6 @@ const ExpanderFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-`;
-
-const ExpanderLabel = styled.div`
-  margin-left: 0;
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 900;
-  line-height: 1;
-  text-align: left;
-  word-break: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 `;
 
 /* Brand removed per user request; toggle will use SVG icons from public/ */
@@ -165,6 +158,7 @@ const CollapseToggle = styled.button<{ $rotated?: boolean }>`
 
 const Main = styled.main`
   flex: 1;
+  padding: 28px;
   background: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.bg) || '#000000'};
   min-width: 0;
   height: 100vh;
@@ -178,17 +172,8 @@ const Main = styled.main`
 `;
 
 export default function DashboardShell({ children, active }: { children: React.ReactNode; active?: string }) {
-  // Get role from JWT in localStorage
-  let role: string | null = null;
-  if (typeof window !== 'undefined') {
-    const token = window.localStorage.getItem('jwt');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        role = payload.role || null;
-      } catch {}
-    }
-  }
+  const { data: session } = useSession();
+  const role = (session && (session as any).user && (session as any).user.role) ? (session as any).user.role : null;
   const pathname = usePathname();
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
@@ -221,8 +206,12 @@ export default function DashboardShell({ children, active }: { children: React.R
   }, []);
 
   async function handleLogout() {
-    window.localStorage.removeItem('jwt');
-    if (typeof window !== 'undefined') window.location.href = '/auth/login';
+    try {
+      await signOut({ callbackUrl: '/auth/login' });
+    } catch (err) {
+      // fallback: redirect
+      if (typeof window !== 'undefined') window.location.href = '/auth/login';
+    }
   }
 
   function toggleCollapse() {
@@ -240,7 +229,7 @@ export default function DashboardShell({ children, active }: { children: React.R
     try { localStorage.setItem('sidebar_collapsed', '1'); } catch (e) {}
   }
 
-  // role is derived from JWT in localStorage
+  // role is derived from NextAuth session via `useSession`
 
   return (
     <Shell>
@@ -317,61 +306,59 @@ export default function DashboardShell({ children, active }: { children: React.R
         <Expander aria-hidden={!panelOpen} role="menu">
           {/* top spacer to align first label with the collapsed sidebar toggle/button */}
           <div style={{ height: 'var(--sidebar-top-height)' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
-            {(() => {
-              const items = (role === 'admin') ? [
-                { href: '/admin', key: 'overview', label: 'Overview', Icon: Home },
-                { href: '/admin/users', key: 'users', label: 'Users', Icon: UsersIcon },
-                { href: '/admin/staff', key: 'staff', label: 'Staff', Icon: User },
-                { href: '/admin/mail', key: 'mail', label: 'Mail', Icon: Mail },
-                { href: '/admin/projects', key: 'projects-admin', label: 'Projects', Icon: Briefcase },
-                { href: '/admin/meetings', key: 'meetings-admin', label: 'Meetings', Icon: CalendarClock },
-                { href: '/admin/tasks', key: 'tasks', label: 'Tasks', Icon: ClipboardList },
-                { href: '/admin/onboard', key: 'onboard', label: 'Onboard', Icon: Compass },
-                { href: '/admin/blogs', key: 'blogs', label: 'Blogs', Icon: BookOpen },
-                { href: '/admin/news', key: 'news', label: 'News', Icon: Newspaper },
+          {(() => {
+            const items = (role === 'admin') ? [
+              { href: '/admin', key: 'overview', label: 'Overview', Icon: Home },
+              { href: '/admin/users', key: 'users', label: 'Users', Icon: UsersIcon },
+              { href: '/admin/staff', key: 'staff', label: 'Staff', Icon: User },
+              { href: '/admin/mail', key: 'mail', label: 'Mail', Icon: Mail },
+              { href: '/admin/projects', key: 'projects-admin', label: 'Projects', Icon: Briefcase },
+              { href: '/admin/meetings', key: 'meetings-admin', label: 'Meetings', Icon: CalendarClock },
+              { href: '/admin/tasks', key: 'tasks', label: 'Tasks', Icon: ClipboardList },
+              { href: '/admin/onboard', key: 'onboard', label: 'Onboard', Icon: Compass },
+              { href: '/admin/blogs', key: 'blogs', label: 'Blogs', Icon: BookOpen },
+              { href: '/admin/news', key: 'news', label: 'News', Icon: Newspaper },
+              { href: '/chat', key: 'chat', label: 'Chat', Icon: MessageSquare },
+              { href: '/admin/finance', key: 'finance-admin', label: 'Finance', Icon: CreditCard },
+              { href: '/dashboard/settings', key: 'settings', label: 'Settings', Icon: Settings },
+              ] : (
+              role === 'staff' ? [
+                { href: '/dashboard', key: 'overview', label: 'Overview', Icon: Home },
+                { href: '/staff/tasks', key: 'tasks', label: 'Tasks', Icon: ClipboardList },
+                { href: '/staff/meetings', key: 'meetings', label: 'Meetings', Icon: CalendarClock },
                 { href: '/chat', key: 'chat', label: 'Chat', Icon: MessageSquare },
-                { href: '/admin/finance', key: 'finance-admin', label: 'Finance', Icon: CreditCard },
+                { href: '/staff/finance', key: 'finance', label: 'Finance', Icon: CreditCard },
                 { href: '/dashboard/settings', key: 'settings', label: 'Settings', Icon: Settings },
-                ] : (
-                role === 'staff' ? [
-                  { href: '/dashboard', key: 'overview', label: 'Overview', Icon: Home },
-                  { href: '/staff/tasks', key: 'tasks', label: 'Tasks', Icon: ClipboardList },
-                  { href: '/staff/meetings', key: 'meetings', label: 'Meetings', Icon: CalendarClock },
-                  { href: '/chat', key: 'chat', label: 'Chat', Icon: MessageSquare },
-                  { href: '/staff/finance', key: 'finance', label: 'Finance', Icon: CreditCard },
-                  { href: '/dashboard/settings', key: 'settings', label: 'Settings', Icon: Settings },
-                ] : [
-                  { href: '/dashboard', key: 'overview', label: 'Overview', Icon: Home },
-                  { href: '/dashboard/projects', key: 'projects', label: 'Projects', Icon: FileText },
-                  { href: role === 'staff' ? '/staff/meetings' : '/dashboard/meetings', key: 'meetings', label: 'Meetings', Icon: CalendarClock },
-                  { href: '/chat', key: 'chat', label: 'Chat', Icon: MessageSquare },
-                  { href: '/dashboard/finance', key: 'finance', label: 'Finance', Icon: CreditCard },
-                  { href: '/dashboard/settings', key: 'settings', label: 'Settings', Icon: Settings },
-                ]
+              ] : [
+                { href: '/dashboard', key: 'overview', label: 'Overview', Icon: Home },
+                { href: '/dashboard/projects', key: 'projects', label: 'Projects', Icon: FileText },
+                { href: role === 'staff' ? '/staff/meetings' : '/dashboard/meetings', key: 'meetings', label: 'Meetings', Icon: CalendarClock },
+                { href: '/chat', key: 'chat', label: 'Chat', Icon: MessageSquare },
+                { href: '/dashboard/finance', key: 'finance', label: 'Finance', Icon: CreditCard },
+                { href: '/dashboard/settings', key: 'settings', label: 'Settings', Icon: Settings },
+              ]
+            );
+
+            return items.map((it) => {
+                const isActive = active === it.key;
+                const isHovered = hoveredKey === it.key;
+                const color = isActive ? '#4b3826ff' : (isHovered ? '#4b3826ff' : '#111');
+                const background = isActive || isHovered ? 'rgba(164, 151, 135, 0.7)' : 'transparent';
+
+                return (
+                <Link href={it.href} key={`exp-${it.key}`}>
+                  <div
+                    onMouseEnter={() => setHoveredKey(it.key)}
+                    onMouseLeave={() => setHoveredKey(null)}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', padding: '8px 12px', borderRadius: 6, textDecoration: 'none', color, background }}
+                  >
+                    {/* left-align label flush with the expander panel's left edge */}
+                    <div style={{ marginLeft: 0, fontSize: 48, fontWeight: 900, lineHeight: 1, textAlign: 'left' }}>{it.label}</div>
+                  </div>
+                </Link>
               );
-
-              return items.map((it) => {
-                  const isActive = active === it.key;
-                  const isHovered = hoveredKey === it.key;
-                  const color = isActive ? '#4b3826ff' : (isHovered ? '#4b3826ff' : '#111');
-                  const background = isActive || isHovered ? 'rgba(164, 151, 135, 0.7)' : 'transparent';
-
-                  return (
-                  <Link href={it.href} key={`exp-${it.key}`}>
-                    <div
-                      onMouseEnter={() => setHoveredKey(it.key)}
-                      onMouseLeave={() => setHoveredKey(null)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', padding: '0 12px', borderRadius: 6, textDecoration: 'none', color, background, height: 'var(--nav-item-size)' }}
-                    >
-                      {/* left-align label flush with the expander panel's left edge */}
-                      <ExpanderLabel>{it.label}</ExpanderLabel>
-                    </div>
-                  </Link>
-                );
-              });
-            })()}
-          </div>
+            });
+          })()}
               {/* footer logout button aligned to bottom */}
               <ExpanderFooter>
                 <a onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', width: '100%', borderRadius: 6, textDecoration: 'none', color: '#b91c1c', background: 'rgba(185,28,28,0.04)', cursor: 'pointer' }}>
@@ -382,7 +369,7 @@ export default function DashboardShell({ children, active }: { children: React.R
         </Expander>
       ) : null}
 
-      <Main><div className="page-container">{children}</div></Main>
+      <Main>{children}</Main>
     </Shell>
   );
 }

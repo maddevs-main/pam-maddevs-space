@@ -302,13 +302,10 @@ export default function RegisterPage() {
         body: JSON.stringify({ name, email, password, organisation, inviteCode }),
       });
       const data = await res.json();
-      if (!res.ok || !data.ok || !data.token) {
+      if (!res.ok) {
         setTempNotification(data?.message || 'Registration failed', true);
         return;
       }
-      // Store JWT in localStorage
-      window.localStorage.setItem('pam_jwt', data.token);
-      window.localStorage.setItem('pam_user', JSON.stringify(data.user));
       setTempNotification('Registration successful!', false);
       // clear fields
       setName('');
@@ -317,8 +314,8 @@ export default function RegisterPage() {
       setConfirmPassword('');
       setOrganisation('');
       setInviteCode('');
-      // redirect to dashboard after small delay
-      setTimeout(() => router.replace('/dashboard'), 900);
+      // optional: redirect to login after small delay
+      setTimeout(() => router.push('/auth/login'), 900);
     } catch (err) {
       console.error(err);
       setTempNotification('Registration failed', true);
@@ -438,7 +435,7 @@ export default function RegisterPage() {
                   </Link>
                   <div style={{marginTop: '0.5rem', fontSize: '0.95em'}}>
                     <a href="https://maddevs.space/onboard" target="_blank" rel="noopener" style={{color: '#786143', textDecoration: 'underline', fontWeight: 500}}>
-           Use this link to begin discovery and receive your exclusive invite code.
+                      Invite code is exclusive after discovery. Use this link for that.
                     </a>
                   </div>
                 </FooterNote>
