@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { validateInvite, markInviteUsed } from "../../../lib/invite";
 import connectToDatabase from "../../../lib/mongodb";
 import bcrypt from "bcrypt";
-import { signToken } from "../../../lib/jwt";
 
 // Local register flow (no Supabase):
 // 1. Validate invite code
@@ -49,9 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // mark invite used with the created user id
     await markInviteUsed(inviteCode, result.insertedId.toString());
 
-    const payload = { id: result.insertedId.toString(), email: userDoc.email, role: userDoc.role, name: userDoc.name, tenantId: userDoc.tenantId || null };
-    const token = signToken(payload);
-    res.json({ ok: true, token, user: payload });
+    res.json({ ok: true, user: { id: result.insertedId.toString(), email: userDoc.email, role: userDoc.role, name: userDoc.name } });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: err.message || String(err) });

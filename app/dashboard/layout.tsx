@@ -1,5 +1,5 @@
 import Header from '../../components/Header';
-import DashboardShell from '../../components/vendor/DashboardShell';
+import DashboardShell from '../../components/vendor/DashboardShellClean';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../lib/nextAuth';

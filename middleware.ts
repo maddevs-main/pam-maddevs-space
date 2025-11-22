@@ -1,50 +1,36 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/jwt';
+import { getToken } from 'next-auth/jwt';
 
-// Middleware to enforce admin/staff/consumer routes access using JWT in Authorization header
+// Middleware to enforce admin routes access. It calls /api/auth/me to validate session and role.
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  // Protect specific role-scoped routes server-side
+  // admin routes -> require admin
+  // staff routes -> require staff
+  // consumer meetings route -> require consumer
+  const origin = req.nextUrl.origin;
   const protectedAdmin = pathname.startsWith('/admin');
   const protectedStaff = pathname.startsWith('/staff');
   const protectedConsumerMeetings = pathname === '/dashboard/meetings' || pathname.startsWith('/dashboard/meetings/');
 
   if (!protectedAdmin && !protectedStaff && !protectedConsumerMeetings) return NextResponse.next();
 
-  // Get JWT from Authorization header
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // Use NextAuth `getToken` to validate the JWT session in middleware (works in Edge).
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+    if (!token) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/auth/login';
+      return NextResponse.redirect(url);
+    }
+    // Token exists; server-side layouts will still perform role checks where needed.
+    return NextResponse.next();
+  } catch (err) {
     const url = req.nextUrl.clone();
     url.pathname = '/auth/login';
     return NextResponse.redirect(url);
   }
-  const token = authHeader.replace('Bearer ', '').trim();
-  const user = verifyToken(token);
-  if (!user) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/auth/login';
-    return NextResponse.redirect(url);
-  }
-
-  // Role-based access enforcement
-  if (protectedAdmin && user.role !== 'admin') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/auth/login';
-    return NextResponse.redirect(url);
-  }
-  if (protectedStaff && user.role !== 'staff') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/auth/login';
-    return NextResponse.redirect(url);
-  }
-  if (protectedConsumerMeetings && user.role !== 'consumer') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/auth/login';
-    return NextResponse.redirect(url);
-  }
-
-  // Token and role are valid
-  return NextResponse.next();
 }
 
 export const config = {

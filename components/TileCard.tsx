@@ -56,7 +56,8 @@ const Shell = styled.div`
 
 const Left = styled.div`
   background: #ffffff3b;
-  padding: 10px 12px;
+  padding: 12px 16px;
+  position: relative; /* allow absolutely positioned top-right amounts inside */
   display: block;
   box-sizing: border-box;
   overflow: hidden;
@@ -67,7 +68,7 @@ const Left = styled.div`
   overflow-y: hidden;
 
   @media (max-width: 800px) {
-    padding: 6px 4px;
+    padding: 8px 6px;
   }
 `;
 
@@ -93,7 +94,7 @@ const Right = styled.div<{ $shellBg?: string }>`
 const Inner = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
   min-width: 0;
   @media(min-width: 640px) {
@@ -102,7 +103,7 @@ const Inner = styled.div`
     justify-content: space-between;
   }
   @media (max-width: 800px) {
-    gap: 4px;
+    gap: 6px;
   }
 `;
 
@@ -113,7 +114,7 @@ const MainInfo = styled.div`
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   @media(min-width: 640px) { margin-bottom: 0; }
   @media (max-width: 800px) {
     margin-bottom: 0;
@@ -126,13 +127,20 @@ const Title = styled.h3`
   font-weight: 600;
   color: #ffffff;
   margin-left: 12px;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  max-width: 100%;
+  /* reserve space on the right for top-right amount block */
+  padding-right: 160px;
+  overflow: hidden;
+  /* allow up to two lines and then truncate with ellipsis for long titles */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   white-space: normal;
+  max-width: 100%;
+  word-break: break-word;
   @media (max-width: 800px) {
     font-size: 0.95rem;
     margin-left: 6px;
+    padding-right: 100px;
   }
 `;
 
@@ -143,6 +151,26 @@ const MetaRow = styled.div`
   font-size: 0.9rem;
   color: rgba(255,255,255,0.9);
   align-items: center;
+  /* ensure child items truncate instead of forcing layout expansion */
+  & > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+`;
+
+const TimelineText = styled.div`
+  margin-top: 6px;
+  color: rgba(180,180,178,0.75);
+  font-size: 13px;
+  @media (max-width: 800px) {
+    font-size: 12px;
+  }
+`;
+
+const ProgressText = styled.div`
+  margin-top: 6px;
+  color: rgba(180,180,178,0.9);
+  font-size: 13px;
+  @media (max-width: 800px) {
+    font-size: 12px;
+  }
 `;
 
 // Meeting ID is intentionally not shown on the tile; dialogs will display it.
@@ -301,7 +329,7 @@ export default function TileCard(props: TileProps) {
             <MainInfo>
               <Title>{title}</Title>
               {/* Timeline row (compact) */}
-              {timeline ? <div style={{ marginTop: 6, color: 'rgba(180,180,178,0.75)', fontSize: 13 }}>{timeline}</div> : null}
+              {timeline ? <TimelineText>{timeline}</TimelineText> : null}
 
               {/* Progress area: prefer explicit props, otherwise allow children to supply custom content */}
               {(props.avgProgress !== undefined || props.progress !== undefined) ? (
@@ -321,15 +349,15 @@ export default function TileCard(props: TileProps) {
                       })()
                     }
                   </div>
-                  <div style={{ marginTop: 6, color: 'rgba(180,180,178,0.9)', fontSize: 13 }}>
+                  <ProgressText>
                     {props.avgProgress !== undefined ? `${props.avgProgress}% average across ${props.stagesCount || '–'} stages` : `${props.progress}%`}
-                  </div>
+                  </ProgressText>
                 </div>
               ) : (
                 // fallback to existing children/leftContent for non-project cards
                 <>
                   {props.leftContent ? <div style={{ marginTop: 8 }}>{props.leftContent}</div> : null}
-                  {props.children ? <div style={{ marginTop: 8 }}>{props.children}</div> : null}
+                              {props.children ? <div style={{ marginTop: 8 }}>{props.children}</div> : null}
                 </>
               )}
             </MainInfo>

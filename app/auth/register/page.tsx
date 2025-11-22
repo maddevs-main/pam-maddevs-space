@@ -435,7 +435,7 @@ export default function RegisterPage() {
                   </Link>
                   <div style={{marginTop: '0.5rem', fontSize: '0.95em'}}>
                     <a href="https://maddevs.space/onboard" target="_blank" rel="noopener" style={{color: '#786143', textDecoration: 'underline', fontWeight: 500}}>
-                      Invite code is exclusive after discovery. Use this link for that.
+           Use this link to begin discovery and receive your exclusive invite code.
                     </a>
                   </div>
                 </FooterNote>

@@ -335,30 +335,9 @@ export default function SettingsPage() {
           </div>
         </Dialog>
       ) : null}
-      {/* Sticky footer for Terms/Conditions - mobile-first, responsive */}
-      <div style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        width: '100%',
-        zIndex: 9000,
-        pointerEvents: 'auto',
-        background: 'rgba(36,36,36,0.98)',
-        boxShadow: '0 -2px 12px rgba(0,0,0,0.12)',
-        padding: '10px 0',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <div style={{
-          maxWidth: 480,
-          width: '100%',
-          padding: '8px 12px',
-          color: 'rgba(180,180,178,0.65)',
-          fontSize: 13,
-          textAlign: 'center',
-          background: 'transparent',
-        }}>
+      {/* Subtle footer specific to Settings page - pinned bottom center */}
+      <div style={{ position: 'fixed', bottom: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 9000, pointerEvents: 'auto' }}>
+        <div style={{ padding: '8px 12px', color: 'rgba(180,180,178,0.55)', fontSize: 13, textAlign: 'center', background: 'transparent' }}>
           <div>
             We updated our <a href="https://maddevs.space/directory/documentation#termsUse" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(158,203,255,0.85)', textDecoration: 'underline' }}>Terms of Use</a> on Feb. 19, 2025.
           </div>

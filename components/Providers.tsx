@@ -1,6 +1,8 @@
 "use client";
 import React from 'react';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
+import { SessionProvider } from 'next-auth/react';
+import LoadingScreen from './LoadingScreen';
 
 const theme = {
   colors: {
@@ -101,32 +103,13 @@ export const StyledButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement
 };
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const originalFetch = window.fetch.bind(window);
-      // wrap global fetch to add Authorization header when pam_jwt is present
-      (window as any).fetch = async (input: RequestInfo, init?: RequestInit) => {
-        try {
-          const token = window.localStorage.getItem('pam_jwt');
-          const mergedInit: RequestInit = { ...(init || {}) };
-          const headers = new Headers(mergedInit.headers || undefined);
-          if (token) headers.set('Authorization', `Bearer ${token}`);
-          mergedInit.headers = headers;
-          return await originalFetch(input, mergedInit);
-        } catch (e) {
-          return await originalFetch(input, init);
-        }
-      };
-      return () => { (window as any).fetch = originalFetch; };
-    } catch (e) {
-      // noop
-    }
-  }, []);
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
-      {children}
+      <SessionProvider>
+        <LoadingScreen />
+        {children}
+      </SessionProvider>
     </ThemeProvider>
   );
 }

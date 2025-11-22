@@ -1,17 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getUserFromRequestAsync } from '../../../lib/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../../lib/nextAuth';
 import connectToDatabase from '../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const user = await getUserFromRequestAsync(req);
-  if (!user || !user.userId) return res.status(401).json({ error: 'unauthenticated' });
+  const session: any = await getServerSession(req, res, authOptions as any);
+  if (!session || !session.user || !(session.user as any).id) return res.status(401).json({ error: 'unauthenticated' });
 
   try {
     const { db } = await connectToDatabase();
-    const userDoc = await db.collection('users').findOne({ _id: new ObjectId(user.userId) }, { projection: { passwordHash: 0 } });
-    if (!userDoc) return res.status(404).json({ error: 'not_found' });
-    const out = { id: userDoc._id.toString(), email: userDoc.email, role: userDoc.role, name: userDoc.name, tenantId: userDoc.tenantId };
+    const user = await db.collection('users').findOne({ _id: new ObjectId((session.user as any).id) }, { projection: { passwordHash: 0 } });
+    if (!user) return res.status(404).json({ error: 'not_found' });
+    const out = { id: user._id.toString(), email: user.email, role: user.role, name: user.name, tenantId: user.tenantId };
     return res.json({ ok: true, user: out });
   } catch (err: any) {
     console.error(err);

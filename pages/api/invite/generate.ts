@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createInvite } from "../../../lib/invite";
-import { requireJwtAuth } from "../../../lib/auth";
+import { requireAuth } from "../../../lib/auth";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
@@ -18,4 +18,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default requireJwtAuth(handler, ['admin']);
+export default requireAuth(handler, ['admin']);

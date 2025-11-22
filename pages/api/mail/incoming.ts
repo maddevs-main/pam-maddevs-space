@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireJwtAuth } from '../../../lib/auth';
+import { requireAuth } from '../../../lib/auth';
 import connectToDatabase from '../../../lib/mongodb';
 
 // This endpoint now reads from MongoDB `incoming_mail` collection with pagination.
@@ -25,4 +25,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default requireJwtAuth(handler, ['admin']);
+export default requireAuth(handler, ['admin']);

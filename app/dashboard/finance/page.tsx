@@ -6,6 +6,51 @@ import TileCard from '../../../components/TileCard';
 import PageShell from '../../../components/PageShell';
 import Dialog from '../../../components/ui/Dialog';
 import CalendarAction from '../../../components/CalendarAction';
+import styled from 'styled-components';
+
+const CompactLeft = styled.div`
+  flex: 1;
+  min-width: 0;
+  .amount { color: rgba(255,255,255,0.95); font-weight: 800; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1; }
+  .meta-row { margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .meta { color: rgba(255,255,255,0.95); font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .meta-pending { color: rgba(180,180,178,0.9); font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .compact-inline { display: none; }
+  @media (max-width: 520px) {
+    .amount { font-size: 14px; }
+    .meta { font-size: 12px; }
+    .meta-pending { font-size: 12px; }
+    .meta-row { gap: 8px; }
+  }
+  /* Aggressive compression for narrow mobile screens */
+  @media (max-width: 420px) {
+    .amount { font-size: 13px; }
+    .meta-row { display: none; }
+    .compact-inline { display: block; font-size: 11px; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
+`;
+
+const CompactRight = styled.div`
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  max-width: 160px;
+  overflow: hidden;
+  .dot { width: 8px; height: 8px; border-radius: 99px; background: rgba(245,158,11,0.9); display: inline-block; flex: 0 0 auto; }
+  .label { color: rgba(245,158,11,0.95); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 520px) {
+    max-width: 120px;
+    .label { font-size: 11px; }
+  }
+  @media (max-width: 420px) {
+    /* hide long label on very small screens to avoid vertical overflow; keep the dot */
+    .label { display: none; }
+    max-width: 28px;
+    margin-left: 8px;
+  }
+`;
 
 export default function DashboardFinancePage() {
   const [tasks, setTasks] = React.useState<any[]>([]);
@@ -205,19 +250,27 @@ export default function DashboardFinancePage() {
                           rightAction={<a onClick={(e:any)=>{ e.stopPropagation(); openTask(p._id); }} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></a>}
                         >
                           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                              <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 16 }}>{`$${total.toLocaleString()}`}</div>
-                              <div style={{ marginTop: 6, display: 'flex', gap: 12 }}>
-                                <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
-                                <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
+                            <CompactLeft>
+                              {/* Notifier shown under the title */}
+                              {waitingConfirmation ? (
+                                <div className="notifier" style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span className="dot" style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block' }} />
+                                  <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 12, fontWeight: 700 }}>Confirmation pending</div>
+                                </div>
+                              ) : null}
+
+                              {/* Top-right amount block positioned inside the Left panel */}
+                              <div style={{ position: 'absolute', top: 10, right: 12, textAlign: 'right', maxWidth: 140 }}>
+                                <div className="amount">{`$${total.toLocaleString()}`}</div>
+                                <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                  <div className="meta" style={{ fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
+                                  <div className="meta-pending">{`Pending: $${pending.toLocaleString()}`}</div>
+                                </div>
                               </div>
-                            </div>
-                            {waitingConfirmation ? (
-                              <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
-                                <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block', marginRight: 8 }} />
-                                <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 12, fontWeight: 700 }}>Confirmation pending</div>
-                              </div>
-                            ) : null}
+
+                              {/* Fallback inline compact summary shown on very small screens */}
+                              <div className="compact-inline">{`Paid: $${paid.toLocaleString()} • Pending: $${pending.toLocaleString()}`}</div>
+                            </CompactLeft>
                           </div>
                         </TileCard>
                       );
@@ -260,9 +313,9 @@ export default function DashboardFinancePage() {
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, minWidth: 180 }}>
-                          <div style={{ fontWeight: 800, fontSize: 20, color: '#ffffff' }}>{typeof m.amount === 'number' ? `$${m.amount}` : m.amount}</div>
-                          <div style={{ display: 'flex', gap: 8 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, minWidth: 0, maxWidth: 180, overflow: 'hidden' }}>
+                          <div style={{ fontWeight: 800, fontSize: 20, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof m.amount === 'number' ? `$${m.amount}` : m.amount}</div>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                             {m.paymentLink ? (
                               <a href={m.paymentLink} target="_blank" rel="noreferrer"><Button style={{ padding: '10px 16px', fontSize: 15 }}>Pay</Button></a>
                             ) : (
@@ -270,9 +323,8 @@ export default function DashboardFinancePage() {
                             )}
 
                             {m.confirmedByUser ? (
-                              <span style={{ fontSize: 13, color: 'rgba(180,180,178,0.9)', padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}>Confirmed</span>
+                              <span style={{ fontSize: 13, color: 'rgba(180,180,178,0.9)', padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Confirmed</span>
                             ) : (
-                              // allow confirm for admins or the project owner (consumer)
                               (currentUser && (currentUser.role === 'admin' || currentUser.type === 'admin' || String(selectedProject?.author?.id) === String(currentUser?.id))) ? (
                                 <button onClick={()=>confirmTaskMilestone(selectedProject._id, i)} style={{ padding: '8px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(180,180,178,0.06)', color: 'rgba(180,180,178,0.95)' }}>Confirm</button>
                               ) : (

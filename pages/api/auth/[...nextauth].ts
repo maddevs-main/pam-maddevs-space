@@ -1,2 +1,4 @@
+import NextAuth from 'next-auth';
+import { authOptions } from '../../../lib/nextAuth';
 
-// Deprecated NextAuth API route removed. This file is no longer used.
+export default NextAuth(authOptions as any);

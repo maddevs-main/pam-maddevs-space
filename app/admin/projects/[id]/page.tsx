@@ -26,7 +26,7 @@ const PlusButton = styled.button`
   width: 88px;
   height: 88px;
   border-radius: 999px;
-  background: #191818;
+  background: #2563eb;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -48,16 +48,6 @@ export default function AdminProjectDetail({ params }: { params: any }) {
 }
 
 function AdminProject({ id }: { id: string }) {
-    async function handleDelete() {
-      if (!window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
-      const res = await fetch('/api/projects/' + projectId, { method: 'DELETE' });
-      if (res.ok) {
-        alert('Project deleted.');
-        router.push('/admin/projects');
-      } else {
-        alert('Failed to delete project.');
-      }
-    }
   const projectId = id;
   const [showMeetingModal, setShowMeetingModal] = React.useState(false);
   const [project, setProject] = React.useState<any | null>(null);
@@ -132,7 +122,7 @@ function AdminProject({ id }: { id: string }) {
   })();
 
   const BackButton = styled.button`
-    background: #191818;
+    background: rgba(255,255,255,0.04);
     border: 1px solid rgba(180,180,178,0.06);
     color: rgba(255,255,255,0.95);
     cursor: pointer;
@@ -346,14 +336,7 @@ function AdminProject({ id }: { id: string }) {
             </Card>
             {/* Admin: edit dialog */}
             {editOpen ? (
-              <Dialog title="Edit project" onClose={() => setEditOpen(false)}
-                footer={
-                  <>
-                    <Button onClick={() => setEditOpen(false)} style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(180,180,178,0.08)' }}>Cancel</Button>
-                    <Button onClick={handleDelete} style={{ background: '#c0392b', color: '#fff', marginLeft: 8 }}>Delete Project</Button>
-                  </>
-                }
-              >
+              <Dialog title="Edit project" onClose={() => setEditOpen(false)} footer={<><Button onClick={() => setEditOpen(false)} style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(180,180,178,0.08)' }}>Cancel</Button></>}>
                 <ProjectForm initial={project} mode="edit" projectId={String(project._id)} adminControls={true} onDone={() => { setEditOpen(false); fetchProject(); }} />
               </Dialog>
             ) : null}
