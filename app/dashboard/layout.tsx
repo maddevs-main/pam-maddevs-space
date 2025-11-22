@@ -3,6 +3,7 @@ import DashboardShell from '../../components/vendor/DashboardShellClean';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../lib/nextAuth';
+import Providers from '../../components/Providers';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions as any) as { user?: any };
@@ -12,12 +13,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const initialUser = { id: (session.user as any).id, role: (session.user as any).role, tenantId: (session.user as any).tenantId };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header is a client component; provide initialUser to avoid a client-side fetch and UI flash */}
-      <Header title="maddevs" initialUser={initialUser} />
-      <DashboardShell>
-        {children}
-      </DashboardShell>
-    </div>
+    <Providers>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        {/* Header is a client component; provide initialUser to avoid a client-side fetch and UI flash */}
+        <Header title="maddevs" initialUser={initialUser} />
+        <DashboardShell>
+          {children}
+        </DashboardShell>
+      </div>
+    </Providers>
   );
 }

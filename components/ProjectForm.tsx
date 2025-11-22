@@ -2,7 +2,6 @@
 import React from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
-import styled from 'styled-components';
 import { TextInput } from './ui/Input';
 import RichTextEditor from './ui/RichTextEditor';
 
@@ -256,19 +255,7 @@ export default function ProjectForm({ initial, mode = 'create', projectId, onDon
         ) : null}
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                {/* responsive submit: hide label on very small screens to avoid overflow */}
-                {/** Styled wrapper so we can hide the label text on narrow viewports */}
-                {(() => {
-                  const ResponsiveSubmit = styled(Button)`
-                    & .btn-text { display: inline-block; }
-                    @media (max-width: 420px) { & .btn-text { display: none; } }
-                  `;
-                  return (
-                    <ResponsiveSubmit type="submit">
-                      <span className="btn-text">{mode === 'create' ? 'Request Project' : 'Save changes'}</span>
-                    </ResponsiveSubmit>
-                  );
-                })()}
+          <Button type="submit">{mode === 'create' ? 'Request Project' : 'Save changes'}</Button>
         </div>
         {message && <p style={{ marginTop: 8 }}>{message}</p>}
       </Card>

@@ -5,6 +5,7 @@ import Header from '../../../components/Header';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, User, Building, Ticket } from 'lucide-react';
 import styled, { createGlobalStyle } from 'styled-components';
+import Providers from '../../../components/Providers';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -323,7 +324,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <>
+    <Providers>
       <Header title="maddevs" />
       <GlobalStyle />
       <Background>
@@ -435,7 +436,7 @@ export default function RegisterPage() {
                   </Link>
                   <div style={{marginTop: '0.5rem', fontSize: '0.95em'}}>
                     <a href="https://maddevs.space/onboard" target="_blank" rel="noopener" style={{color: '#786143', textDecoration: 'underline', fontWeight: 500}}>
-           Use this link to begin discovery and receive your exclusive invite code.
+                      Invite code is exclusive after discovery. Use this link for that.
                     </a>
                   </div>
                 </FooterNote>
@@ -445,6 +446,6 @@ export default function RegisterPage() {
           </Container>
         </PageWrapper>
       </Background>
-    </>
+    </Providers>
   );
 }

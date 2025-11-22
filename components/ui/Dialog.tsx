@@ -14,7 +14,7 @@ const Overlay = styled.div`
 `;
 
 const Panel = styled.div<{ $panelColor?: string; $borderColor?: string }>`
-  background: ${p => p.$panelColor || 'rgba(5,5,5,0.80)'};
+  background: ${p => p.$panelColor || '#191818'};
   border-radius: 15px;
   width: 720px;
   max-width: calc(100vw - 24px);
@@ -79,6 +79,9 @@ const Body = styled.div`
   overflow: auto;
   flex: 1 1 auto;
   min-width: 0;
+  max-width: 100vw;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 
   input, textarea, select {
     background: #2f2f2f;
@@ -89,6 +92,8 @@ const Body = styled.div`
     font-size: 15px;
     width: 100%;
     box-sizing: border-box;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   textarea { min-height: 120px; }

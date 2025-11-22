@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../../lib/mongodb';
-import { requireAuth } from '../../../../lib/auth';
+import { requireJwtAuth } from '../../../../lib/auth';
 import { ObjectId } from 'mongodb';
 
 // simple in-memory rate limiter (per-process). For production, replace with Redis-backed limiter.
@@ -103,4 +103,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.status(405).end();
 }
 
-export default requireAuth(handler, ['admin','staff','consumer']);
+export default requireJwtAuth(handler, ['admin','staff','consumer']);

@@ -22,16 +22,6 @@ const Container = styled.div`
   min-width: 0;
   overflow-x: hidden;
   overflow-y: hidden;
-  box-sizing: border-box;
-  /* Match project tile dimensions for visual consistency */
-  height: 110px;
-  min-height: 110px;
-  max-height: 110px;
-  @media (max-width: 800px) {
-    height: 80px;
-    min-height: 80px;
-    max-height: 80px;
-  }
 `;
 
 const Shell = styled.div`
@@ -42,7 +32,6 @@ const Shell = styled.div`
   min-width: 0;
   overflow-x: hidden;
   overflow-y: hidden;
-  height: 100%;
   @media (max-width: 800px) {
     grid-template-columns: 1fr 70px;
   }
@@ -50,7 +39,7 @@ const Shell = styled.div`
 
 const Left = styled.div`
   background: #ffffff39;
-  padding: 12px 16px;
+  padding: 12px 14px;
   display: block;
   box-sizing: border-box;
   overflow: hidden;
@@ -59,9 +48,8 @@ const Left = styled.div`
   min-width: 0;
   overflow-x: hidden;
   overflow-y: hidden;
-  height: 100%;
   @media (max-width: 800px) {
-    padding: 8px 6px;
+    padding: 6px 4px;
   }
 `;
 
@@ -76,7 +64,6 @@ const Right = styled.div<{ $shellBg?: string }>`
   min-width: 0;
   overflow-x: hidden;
   overflow-y: hidden;
-  height: 100%;
   @media (max-width: 800px) {
     min-width: 60px;
     padding: 4px;
@@ -86,17 +73,16 @@ const Right = styled.div<{ $shellBg?: string }>`
 const Inner = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   min-width: 0;
-  height: 100%;
   @media(min-width: 640px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
   @media (max-width: 800px) {
-    gap: 6px;
+    gap: 4px;
   }
 `;
 
@@ -107,8 +93,7 @@ const MainInfo = styled.div`
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  height: 100%;
+  justify-content: center;
   @media(min-width: 640px) { margin-bottom: 0; }
   @media (max-width: 800px) {
     margin-bottom: 0;
@@ -121,13 +106,10 @@ const Title = styled.h3`
   font-weight: 600;
   color: #ffffff;
   overflow: hidden;
-  /* allow titles to wrap to two lines and then ellipsize */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  white-space: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 100%;
-  word-break: break-word;
+  word-break: break-all;
   @media (max-width: 800px) {
     font-size: 0.95rem;
   }
@@ -140,20 +122,12 @@ const MetaRow = styled.div`
   font-size: 0.9rem;
   color: rgba(255,255,255,0.9);
   align-items: center;
-  @media (max-width: 800px) {
-    gap: 6px 10px;
-    font-size: 0.85rem;
-  }
-  & > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 `;
 
 const IdText = styled.div`
   font-size: 0.8rem;
   color: rgba(255,255,255,0.85);
   opacity: 0.95;
-  @media (max-width: 800px) {
-    display: none;
-  }
 `;
 
 const StatusWrap = styled.div`

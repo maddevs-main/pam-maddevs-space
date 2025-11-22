@@ -54,22 +54,9 @@ const SquarePlus = styled.button`
   font-weight: 700;
   font-size: 14px;
   transition: background 140ms ease, transform 120ms ease;
-  /* keep icon sizing reasonable and consistent with Create Project button */
-  svg, img { display: block; width: 24px; height: 24px; }
   &:hover { background: rgba(var(--color-yes-rgb),0.90); transform: translateY(-2px); }
   &:active { transform: translateY(0); }
   &:focus-visible { outline: 3px solid rgba(255,255,255,0.06); outline-offset: 3px; }
-  @media (max-width: 800px) {
-    padding: 6px 10px;
-    font-size: 13px;
-    height: 40px;
-    gap: 8px;
-  }
-  /* hide the text label on very small screens to avoid overflow — icon remains visible */
-  & .btn-text { display: inline-block; pointer-events: none; }
-  @media (max-width: 420px) {
-    & .btn-text { display: none; }
-  }
 `;
 
 const FooterNeutral = styled(SquarePlus)`
@@ -83,12 +70,6 @@ const FooterNeutral = styled(SquarePlus)`
   gap: 8px;
   &:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
   &:active { transform: translateY(0); }
-  @media (max-width: 800px) {
-    padding: 6px 10px;
-    height: 38px;
-    font-size: 13px;
-    gap: 6px;
-  }
 `;
 
 const FooterPrimary = styled(SquarePlus)`
@@ -101,12 +82,6 @@ const FooterPrimary = styled(SquarePlus)`
   font-size: 14px;
   gap: 10px;
   &:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
-  @media (max-width: 800px) {
-    padding: 6px 10px;
-    height: 38px;
-    font-size: 13px;
-    gap: 8px;
-  }
 `;
 
 export default function MeetingsView() {
@@ -226,15 +201,15 @@ export default function MeetingsView() {
     });
 
     return (
-      <PageShell title="Meetings" subtitle="Request and review meetings." actions={<div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}><CalendarAction items={calItems} title="Meetings calendar" /><div style={{ display: 'flex', alignItems: 'center' }}><SquarePlus onClick={() => setOpen(true)} title="Request a meeting" aria-label="Request a meeting">
+      <PageShell title="Meetings" subtitle="Request and review meetings." actions={<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><CalendarAction items={calItems} title="Meetings calendar" /><SquarePlus onClick={() => setOpen(true)} title="Request a meeting" aria-label="Request a meeting">
         <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 34, width: 34 }} aria-hidden="true">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <line x1="12" y1="5" x2="12" y2="19" stroke="#000" strokeWidth="2" strokeLinecap="round" />
             <line x1="5" y1="12" x2="19" y2="12" stroke="#000" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </span>
-        <span className="btn-text">Request a meeting</span>
-      </SquarePlus></div></div>}>
+        Request a meeting
+      </SquarePlus></div>}>
         <div>
 
       {open ? (
@@ -309,7 +284,7 @@ export default function MeetingsView() {
                     link: m.link,
                     requestedBy: (m.requestedBy && (m.requestedBy.name || m.requestedBy.id)) || m.requestedBy || undefined,
                     status: m.status || '—'
-                  }} onClick={() => setSelectedMeeting(m)} rightAction={<span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span>} />
+                  }} onClick={() => setSelectedMeeting(m)} />
                 </div>
               ))}
             </div>

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../lib/mongodb';
-import { requireAuth } from '../../../lib/auth';
+import { requireJwtAuth } from '../../../lib/auth';
 import nodemailer from 'nodemailer';
 import { ObjectId } from 'mongodb';
 
@@ -96,4 +96,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.json({ ok: overallOk, results, error: overallOk ? undefined : 'one_or_more_recipients_failed' });
 }
 
-export default requireAuth(handler, ['admin']);
+export default requireJwtAuth(handler, ['admin']);

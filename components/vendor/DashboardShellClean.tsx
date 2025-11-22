@@ -154,7 +154,7 @@ const CollapseToggleStyled = styled.button<{ $rotated: boolean, $collapsed: bool
 
 const Main = styled.main`
   flex: 1;
-  padding: 32px; /* p-8 */
+  padding: 16px; /* minimal padding for mobile */
   background: #051020; /* Dark Gray BG */
   min-width: 0;
   height: 100vh;
@@ -164,6 +164,10 @@ const Main = styled.main`
   scrollbar-width: thin;
   &::-webkit-scrollbar { width: 8px; background: transparent; }
   &::-webkit-scrollbar-thumb { background: rgba(120,120,120,0.12); border-radius: 8px; }
+
+  @media (min-width: 768px) { /* md breakpoint and up */
+    padding: 32px;
+  }
 `;
 
 const ContentWrap = styled.div`
@@ -174,8 +178,8 @@ const ContentWrap = styled.div`
   padding-left: 8px;
   padding-right: 8px;
   @media (max-width: 640px) {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 0;
+    padding-right: 0;
     max-width: 100%;
   }
 `;

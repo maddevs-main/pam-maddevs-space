@@ -46,10 +46,7 @@ function CreateProjectButton({ onCreated }: { onCreated?: () => void }) {
     font-weight: 700;
     font-size: 14px;
     transition: background 140ms ease, transform 120ms ease;
-      /* keep icon sizing reasonable */
-      svg, img { display: block; width: 24px; height: 24px; }
-      & .btn-text { display: inline-block; }
-      @media (max-width: 420px) { & .btn-text { display: none; } }
+      svg, img { display: block; width: 70px; height: 70px; }
       &:hover { background: var(--color-yes); transform: translateY(-2px); }
     &:active { transform: translateY(0); }
     &:focus-visible { outline: 3px solid rgba(255,255,255,0.06); outline-offset: 3px; }
@@ -64,7 +61,7 @@ function CreateProjectButton({ onCreated }: { onCreated?: () => void }) {
             <line x1="5" y1="12" x2="19" y2="12" stroke="#000" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </span>
-        <span className="btn-text" style={{ pointerEvents: 'none' }}>Create a project request</span>
+        <span style={{ pointerEvents: 'none' }}>Create a project request</span>
       </SquarePlus>
       {open ? (
         <Dialog title="Create a project request" onClose={() => setOpen(false)} borderColor={'rgba(44, 44, 44, 0.85)'}>

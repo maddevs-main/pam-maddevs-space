@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../lib/mongodb';
-import { requireAuth } from '../../../lib/auth';
+import { requireJwtAuth } from '../../../lib/auth';
 import { ObjectId } from 'mongodb';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -96,4 +96,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.status(405).end();
 }
 
-export default requireAuth(handler);
+export default requireJwtAuth(handler);

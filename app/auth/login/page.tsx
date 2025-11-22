@@ -8,6 +8,7 @@ import { signIn } from 'next-auth/react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import styled, { createGlobalStyle } from 'styled-components';
+import Providers from '../../../components/Providers';
 
 // --- 1. Global Styles ---
 const GlobalStyle = createGlobalStyle`
@@ -255,7 +256,7 @@ export default function LoginPage() {
   };
 
   return (
-    <>
+    <Providers>
       {loading && <LoadingScreen />}
       <Header title="maddevs" />
       <GlobalStyle />
@@ -321,6 +322,6 @@ export default function LoginPage() {
           </Container>
         </PageWrapper>
       </Background>
-    </>
+    </Providers>
   );
 }

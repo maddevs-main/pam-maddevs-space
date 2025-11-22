@@ -1,7 +1,10 @@
-// Legacy-compatible mail template helpers ported from public/maddevs-space
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-const LOGO_URL = BASE_URL + '/favicon.svg';
-const MAIL_TOP_URL = BASE_URL + '/assets/media/mail-top.png';
+
+import { getBaseUrl } from './utils';
+
+// Use the dynamic base URL.
+const BASE_URL = getBaseUrl();
+const LOGO_URL = `${BASE_URL}/favicon.svg`;
+const MAIL_TOP_URL = `${BASE_URL}/assets/media/mail-top.png`;
 
 function meetingCredentialsTable(data: any, showMeetingLink = true) {
   const safe = (v: any) => (v ? String(v) : '-');
@@ -25,7 +28,7 @@ function meetingCredentialsTable(data: any, showMeetingLink = true) {
 }
 
 function footer() {
-  const domain = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+  const domain = getBaseUrl()
     .replace(/^https?:\/\//, '')
     .replace(/\/$/, '');
   const mailFrom = process.env.MAIL_FROM || `mail@${domain.replace(/^www\./, '')}`;

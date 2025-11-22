@@ -235,9 +235,9 @@ export default function AdminFinancePage() {
                                   </div>
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, minWidth: 0, maxWidth: 180, overflow: 'hidden' }}>
-                                  <div style={{ fontWeight: 800, fontSize: 20, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof m.amount === 'number' ? `$${m.amount}` : m.amount}</div>
-                                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, minWidth: 180 }}>
+                                  <div style={{ fontWeight: 800, fontSize: 20, color: '#ffffff' }}>{typeof m.amount === 'number' ? `$${m.amount}` : m.amount}</div>
+                                  <div style={{ display: 'flex', gap: 8 }}>
                                     {m.paymentLink ? (
                                       <a href={m.paymentLink} target="_blank" rel="noreferrer"><Button style={{ padding: '10px 16px', fontSize: 15 }}>Pay</Button></a>
                                     ) : null}

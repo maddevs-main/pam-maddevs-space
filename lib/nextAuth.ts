@@ -1,3 +1,4 @@
+
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcrypt';
@@ -34,6 +35,17 @@ export const authOptions = {
     updateAge: 24 * 60 * 60,  // Refresh session every 24 hours
   },
   jwt: { /* use default */ },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev_nextauth_secret',
   callbacks: {
     async jwt({ token, user }) {
