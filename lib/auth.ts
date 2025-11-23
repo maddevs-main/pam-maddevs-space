@@ -75,4 +75,7 @@ export function requireAuth(handler: any, roles?: string[]) {
   };
 }
 
-export default { setLoginCookie, clearLoginCookie, getUserFromRequest, requireAuth, getUserFromRequestAsync };
+// Backwards-compatibility alias: some routes import `requireJwtAuth`
+export const requireJwtAuth = requireAuth;
+
+export default { setLoginCookie, clearLoginCookie, getUserFromRequest, requireAuth, requireJwtAuth, getUserFromRequestAsync };
