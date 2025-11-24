@@ -315,7 +315,7 @@ export default function LoginPage() {
 
               <FieldWrapper>
                 <SubmitButton type="submit" disabled={loading} aria-busy={loading} aria-disabled={loading}>
-                  {loading ? <InlineLoader size={18} /> : 'Sign In'}
+                  {loading ? <InlineLoader size={25} /> : 'Sign In'}
                 </SubmitButton>
               </FieldWrapper>
 

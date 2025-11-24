@@ -505,11 +505,11 @@ function DashboardStats({ data, currentUser }) {
       {/* Finance stats card spanning one column */}
       <FinanceMetricCard>
         <h3 style={{ margin: 0, color: '#f8f8f8' }}>Finance</h3>
-        <MetricLabel>Total Received</MetricLabel>
+        <MetricLabel>Total Paid</MetricLabel>
         <BigNumber>{'$' + paid.toLocaleString()}</BigNumber>
         <MetricLabel style={{ marginTop: 12 }}>Total Pending</MetricLabel>
         <BigNumber style={{ color: '#eab308' }}>{'$' + pending.toLocaleString()}</BigNumber>
-        <MetricSub style={{ marginTop: 10 }}>{'You have received ' + pct + '% of your total'}</MetricSub>
+        <MetricSub style={{ marginTop: 10 }}>{'You have paid ' + pct + '% of your total'}</MetricSub>
       </FinanceMetricCard>
     </Grid>
     </>
