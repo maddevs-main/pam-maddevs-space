@@ -5,7 +5,6 @@ import Header from '../../../components/Header';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, User, Building, Ticket } from 'lucide-react';
 import styled, { createGlobalStyle } from 'styled-components';
-import Providers from '../../../components/Providers';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -324,7 +323,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <Providers>
+    <>
       <Header title="maddevs" />
       <GlobalStyle />
       <Background>
@@ -446,6 +445,6 @@ export default function RegisterPage() {
           </Container>
         </PageWrapper>
       </Background>
-    </Providers>
+    </>
   );
 }

@@ -3,8 +3,7 @@ import DashboardStats from '../../components/DashboardStats';
 import CalendarAction from '../../components/CalendarAction';
 import DashboardGreeting from '../../components/DashboardGreeting';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/nextAuth';
+import getServerAuth from '../../lib/serverAuth';
 import connectToDatabase from '../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { sanitizeList, sanitizeDoc } from '../../lib/sanitize';
@@ -14,7 +13,7 @@ export default async function DashboardPage() {
   // Fetch user-specific data server-side where possible
 
   // Use NextAuth server session directly (avoids internal API fetches that don't forward cookies)
-  const session: any = await getServerSession(authOptions as any);
+  const session: any = await getServerAuth();
   if (!session || !session.user || !(session.user as any).id) {
     redirect('/auth/login');
   }

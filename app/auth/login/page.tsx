@@ -4,11 +4,10 @@ import Header from '../../../components/Header';
 import dynamic from 'next/dynamic';
 const LoadingScreen = dynamic(() => import('../../../components/LoadingScreen'), { ssr: false });
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import styled, { createGlobalStyle } from 'styled-components';
-import Providers from '../../../components/Providers';
 
 // --- 1. Global Styles ---
 const GlobalStyle = createGlobalStyle`
@@ -208,7 +207,7 @@ export default function LoginPage() {
 
 
   // Use NextAuth client session for redirect after sign-in, fallback to cookie polling only if session is not detected
-  const { data: session, status } = require('next-auth/react').useSession();
+  const { data: session, status } = useSession();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -225,24 +224,35 @@ export default function LoginPage() {
         return;
       }
 
-      // If signIn succeeded, immediately route to dashboard based on credentials
-      // NextAuth credentials provider returns user role in session after login
-      // Try to get user role from session or fallback to /api/auth/me
-      let dest = '/dashboard';
-      let userRole = null;
-      if (session && session.user && session.user.role) {
-        userRole = session.user.role;
-      } else {
-        // Fallback: fetch user from /api/auth/me
+      // Credentials signIn succeeded. NextAuth may not have the session immediately
+      // available to the client because cookies are set as part of the response
+      // — poll `/api/auth/me` a few times to read the authoritative role and
+      // only then redirect. This avoids spuriously redirecting back to login
+      // during SSR checks while still keeping behavior simple.
+      let userRole: string | null = null;
+      const maxAttempts = 6;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           const check = await fetch('/api/auth/me', { credentials: 'same-origin' });
           if (check.ok) {
             const data = await check.json();
-            if (data && data.user && data.user.role) userRole = data.user.role;
+            if (data && data.user && data.user.role) {
+              userRole = data.user.role;
+              break;
+            }
           }
-        } catch (e) { /* ignore transient errors */ }
+        } catch (e) {
+          // ignore transient network errors
+        }
+        // backoff before retrying so server has time to set cookies
+        // small delay: 200ms, increasing
+        await new Promise((r) => setTimeout(r, 200 + attempt * 150));
       }
+
+      let dest = '/dashboard';
       if (userRole === 'admin') dest = '/admin';
+      // if role not discovered, default to /dashboard — this is safe because
+      // server-side checks will validate session; user stays signed in if auth ok.
       router.replace(dest);
       return;
 
@@ -256,7 +266,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Providers>
+    <>
       {loading && <LoadingScreen />}
       <Header title="maddevs" />
       <GlobalStyle />
@@ -322,6 +332,6 @@ export default function LoginPage() {
           </Container>
         </PageWrapper>
       </Background>
-    </Providers>
+    </>
   );
 }

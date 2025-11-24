@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/nextAuth';
+import getServerAuth from '../../../../lib/serverAuth';
 import connectToDatabase from '../../../../lib/mongodb';
 import ProjectDetailsClient from './ProjectDetails.client';
 import { ObjectId } from 'mongodb';
@@ -7,8 +6,8 @@ import { redirect } from 'next/navigation';
 import { sanitizeDoc } from '../../../../lib/sanitize';
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const { id } = params;
-  const session = await getServerSession(authOptions as any);
+  const { id } = await params as any;
+  const session = await getServerAuth();
   if (!session || !(session as any).user) {
     redirect('/auth/login');
   }

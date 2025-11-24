@@ -1,19 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { verifyToken } from './jwt';
 
 // Legacy cookie helpers are retained for compatibility but new auth uses NextAuth.
 export function setLoginCookie(res: NextApiResponse, token: string, maxAge = 60 * 60 * 24 * 7) {
   const secure = process.env.NODE_ENV === 'production';
   const expires = new Date(Date.now() + maxAge * 1000).toUTCString();
-  const parts = [`pam_token=${token}`, `HttpOnly`, `Path=/`, `Max-Age=${maxAge}`, `Expires=${expires}`, `SameSite=Lax`];
+  const sameSite = secure ? 'None' : 'Lax';
+  const parts = [`pam_token=${token}`, `HttpOnly`, `Path=/`, `Max-Age=${maxAge}`, `Expires=${expires}`, `SameSite=${sameSite}`];
   if (secure) parts.push('Secure');
+  // Allow an optional production cookie domain via env var. Do not set on localhost.
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  if (cookieDomain && !cookieDomain.includes('localhost')) parts.push(`Domain=${cookieDomain}`);
   res.setHeader('Set-Cookie', parts.join('; '));
 }
 
 export function clearLoginCookie(res: NextApiResponse) {
+  const secure = process.env.NODE_ENV === 'production';
   const expires = new Date(0).toUTCString();
-  const parts = [`pam_token=`, `HttpOnly`, `Path=/`, `Max-Age=0`, `Expires=${expires}`, `SameSite=Lax`];
-  if (process.env.NODE_ENV === 'production') parts.push('Secure');
+  const sameSite = secure ? 'None' : 'Lax';
+  const parts = [`pam_token=`, `HttpOnly`, `Path=/`, `Max-Age=0`, `Expires=${expires}`, `SameSite=${sameSite}`];
+  if (secure) parts.push('Secure');
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  if (cookieDomain && !cookieDomain.includes('localhost')) parts.push(`Domain=${cookieDomain}`);
   res.setHeader('Set-Cookie', parts.join('; '));
 }
 
@@ -23,6 +32,31 @@ async function resolveTokenFromReq(req: any) {
     const token = await getToken({ req, secret });
     return token || null;
   } catch (e) {
+    // Fallback: support legacy `pam_token` signed JWT or Authorization Bearer
+    try {
+      // 1) Check cookie `pam_token`
+      const cookieHeader = req.headers && (req.headers.cookie || req.headers.Cookie || '');
+      if (cookieHeader) {
+        const match = String(cookieHeader).match(/(^|; )pam_token=([^;]+)/);
+        if (match && match[2]) {
+          const raw = decodeURIComponent(match[2]);
+          const v = verifyToken(raw);
+          if (v) return v;
+        }
+      }
+
+      // 2) Check Authorization header for Bearer token
+      const authHeader = req.headers && (req.headers.authorization || req.headers.Authorization || '');
+      if (authHeader && typeof authHeader === 'string') {
+        if (authHeader.startsWith('Bearer ')) {
+          const raw = authHeader.slice(7).trim();
+          const v = verifyToken(raw);
+          if (v) return v;
+        }
+      }
+    } catch (e2) {
+      // fall through
+    }
     return null;
   }
 }
@@ -75,7 +109,8 @@ export function requireAuth(handler: any, roles?: string[]) {
   };
 }
 
-// Backwards-compatibility alias: some routes import `requireJwtAuth`
+// Backwards-compatible alias: some API routes import `requireJwtAuth`.
+// Keep this small to avoid touching call sites.
 export const requireJwtAuth = requireAuth;
 
-export default { setLoginCookie, clearLoginCookie, getUserFromRequest, requireAuth, requireJwtAuth, getUserFromRequestAsync };
+export default { setLoginCookie, clearLoginCookie, getUserFromRequest, requireAuth, getUserFromRequestAsync };

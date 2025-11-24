@@ -1,11 +1,10 @@
 import Header from '../../components/Header';
 import DashboardShell from '../../components/vendor/DashboardShell';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/nextAuth';
+import getServerAuth from '../../lib/serverAuth';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions as any) as { user?: any };
+  const session = await getServerAuth() as { user?: any };
   if (!session || !session.user) redirect('/auth/login');
   if ((session.user as any).role !== 'admin') redirect('/dashboard');
 

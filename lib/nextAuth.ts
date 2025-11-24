@@ -1,8 +1,17 @@
-
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcrypt';
 import connectToDatabase from './mongodb';
+
+// Runtime checks: warn in production when critical env vars for cookie auth are missing.
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.NEXTAUTH_URL) {
+    console.warn('[Startup] WARNING: NEXTAUTH_URL is not set. NextAuth cookies and redirects may not behave correctly in production.');
+  }
+  if (!process.env.COOKIE_DOMAIN) {
+    console.warn('[Startup] WARNING: COOKIE_DOMAIN is not set. Cross-subdomain cookies may not be set correctly without a custom domain (required on Vercel).');
+  }
+}
 
 export const authOptions = {
   providers: [
@@ -31,21 +40,27 @@ export const authOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 6 * 24 * 60 * 60, // 6 days
+    // Increase session lifetime for a better persistent-login UX
+    // without requiring the user to re-login frequently.
+    maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60,  // Refresh session every 24 hours
   },
-  jwt: { /* use default */ },
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      // Use secure-prefixed cookie names only in production. On localhost
+      // browsers may reject cookies named with `__Secure-` if the Secure
+      // flag is not present. Allow override with NEXTAUTH_COOKIE_NAME.
+      name: process.env.NEXTAUTH_COOKIE_NAME || (process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token'),
       options: {
         httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: process.env.NODE_ENV === 'production',
-      },
-    },
+        path: '/',
+        domain: (process.env.COOKIE_DOMAIN && !process.env.COOKIE_DOMAIN.includes('localhost')) ? process.env.COOKIE_DOMAIN : undefined,
+      }
+    }
   },
+  jwt: { /* use default */ },
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev_nextauth_secret',
   callbacks: {
     async jwt({ token, user }) {

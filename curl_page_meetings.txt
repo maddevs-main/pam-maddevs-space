@@ -1,0 +1,11 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    11    0    11    0     0    349      0 --:--:-- --:--:-- --:--:--   354
+HTTP/1.1 307 Temporary Redirect
+location: /auth/login
+Date: Mon, 24 Nov 2025 01:22:35 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+/auth/login

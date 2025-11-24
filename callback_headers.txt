@@ -1,0 +1,8 @@
+HTTP/1.1 302 Found
+Set-Cookie: next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..ARpAPmv69kh83acp.egUlBlenEQEl3Og4EBC8xiWQFFfEIWKp-fcTUG3SxbcWo295bXQ9wBq4kYkfFyTJCKZKgeg_ThQ-QA8ai9dAgS-ZaD__SFohCGzZFBs0DnZjxSc_6BZXr-TpGLLUIQM3k3QQW98uZBZBFO7UhoofmmDRQUgPVcKao7vctfvjNsAXstyLwNH6Fs5azUJgSiaJO0Hf_bo7yZXLdcSzOCTggwuDf1eeUJUskxwtBxqwbfEwKnis-iPYBLejpmqlsqPGNJt6ddBoLKpIYSuUnr8rKn0m-NLySjHaIecfhu_YbuSCJHGUpslTw-h37hbd1Etcz54.w3ehZui2ex_LymXdLYBZuA; Path=/; Expires=Wed, 24 Dec 2025 01:23:52 GMT; HttpOnly; SameSite=Lax
+Location: http://localhost:3000/dashboard
+Date: Mon, 24 Nov 2025 01:23:52 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+

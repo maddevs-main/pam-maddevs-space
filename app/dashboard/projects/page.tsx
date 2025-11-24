@@ -215,11 +215,25 @@ function ProjectList({ refreshKey }: { refreshKey?: number }) {
   async function fetchList() {
     setLoading(true);
     try {
-      const [projRes, userRes] = await Promise.all([fetch('/api/projects'), fetch('/api/users/me')]);
+      async function fetchWithRetry(url: string, opts?: any, retries = 1, delay = 300) {
+        try {
+          const res = await fetch(url, opts);
+          if ((res.status === 401 || res.status === 403) && retries > 0) {
+            await new Promise(r => setTimeout(r, delay));
+            return fetchWithRetry(url, opts, retries - 1, delay);
+          }
+          return res;
+        } catch (e) {
+          if (retries > 0) { await new Promise(r => setTimeout(r, delay)); return fetchWithRetry(url, opts, retries - 1, delay); }
+          throw e;
+        }
+      }
+
+      const [projRes, userRes] = await Promise.all([fetchWithRetry('/api/projects'), fetchWithRetry('/api/users/me')]);
       let projectsData: any[] = [];
       let userData: any = null;
 
-      // If either API returns 401/403, redirect to login
+      // If either API returns 401/403 (after a retry), redirect to login
       if (projRes.status === 401 || projRes.status === 403 || userRes.status === 401 || userRes.status === 403) {
         window.location.href = '/auth/login';
         return;

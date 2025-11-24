@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
-import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
+import { SessionProvider } from 'next-auth/react';
 
 const theme = {
   colors: {
@@ -125,11 +125,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     }
   }, []);
   return (
-    <SessionProvider>
-      <ThemeProvider theme={theme}>
-        <GlobalStyle />
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <SessionProvider refetchInterval={60} refetchWhenHidden={false}>
         {children}
-      </ThemeProvider>
-    </SessionProvider>
+      </SessionProvider>
+    </ThemeProvider>
   );
 }

@@ -69,7 +69,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if (req.method === 'PATCH') {
     const body = req.body || {};
-    const project = await db.collection('projects').findOne({ _id: projId, tenantId: auth.tenantId });
+    // Resolve the project similar to the GET handler so consumers without a tenantId
+    // (or cases where tenantId isn't present) can still modify their own project.
+    let project: any = null;
+    if (projId && auth.tenantId) {
+      project = await db.collection('projects').findOne({ _id: projId, tenantId: auth.tenantId });
+    }
+    if (!project && projId) {
+      project = await db.collection('projects').findOne({ _id: projId });
+    }
+    if (!project && auth.tenantId) {
+      project = await db.collection('projects').findOne({ id: id as any, tenantId: auth.tenantId });
+    }
+    if (!project) {
+      project = await db.collection('projects').findOne({ id: id as any });
+    }
     if (!project) return res.status(404).json({ error: 'not_found' });
     const role = auth.role as string;
 

@@ -97,12 +97,26 @@ export default function MeetingsView() {
   async function init() {
     setLoading(true);
     try {
-      const me = await fetch('/api/auth/me', { credentials: 'same-origin' });
+      async function fetchWithRetry(url:string, opts?: any, retries = 1, delay = 300) {
+        try {
+          const res = await fetch(url, opts);
+          if ((res.status === 401 || res.status === 403) && retries > 0) {
+            await new Promise(r => setTimeout(r, delay));
+            return fetchWithRetry(url, opts, retries - 1, delay);
+          }
+          return res;
+        } catch (e) {
+          if (retries > 0) { await new Promise(r => setTimeout(r, delay)); return fetchWithRetry(url, opts, retries - 1, delay); }
+          throw e;
+        }
+      }
+
+      const me = await fetchWithRetry('/api/auth/me', { credentials: 'same-origin' });
       if (!me.ok) { window.location.href = '/auth/login'; return; }
       const userData = await me.json();
       setCurrentUser(userData.user || userData);
 
-      const md = await fetch('/api/meetings', { credentials: 'same-origin' });
+      const md = await fetchWithRetry('/api/meetings', { credentials: 'same-origin' });
       if (!md.ok) { setMeetings([]); setLoading(false); return; }
       const d = await md.json(); setMeetings(d.meetings || []);
     } catch (e) { setMeetings([]); }

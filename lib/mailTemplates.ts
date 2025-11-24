@@ -1,10 +1,9 @@
-
-import { getBaseUrl } from './utils';
-
-// Use the dynamic base URL.
-const BASE_URL = getBaseUrl();
-const LOGO_URL = `${BASE_URL}/favicon.svg`;
-const MAIL_TOP_URL = `${BASE_URL}/assets/media/mail-top.png`;
+// Legacy-compatible mail template helpers ported from public/maddevs-space
+// Use the configured `NEXT_PUBLIC_APP_URL` in production. Only fall back to
+// localhost for development to avoid leaking dev values into production.
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : '');
+const LOGO_URL = (BASE_URL ? BASE_URL : '') + '/favicon.svg';
+const MAIL_TOP_URL = (BASE_URL ? BASE_URL : '') + '/assets/media/mail-top.png';
 
 function meetingCredentialsTable(data: any, showMeetingLink = true) {
   const safe = (v: any) => (v ? String(v) : '-');
@@ -28,10 +27,9 @@ function meetingCredentialsTable(data: any, showMeetingLink = true) {
 }
 
 function footer() {
-  const domain = getBaseUrl()
-    .replace(/^https?:\/\//, '')
-    .replace(/\/$/, '');
-  const mailFrom = process.env.MAIL_FROM || `mail@${domain.replace(/^www\./, '')}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : '');
+  const domain = appUrl ? appUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') : '';
+  const mailFrom = process.env.MAIL_FROM || (domain ? `mail@${domain.replace(/^www\./, '')}` : 'mail@localhost');
   const phone = process.env.MAIL_PHONE || '+91 9211918520';
   return `
     <tr>
