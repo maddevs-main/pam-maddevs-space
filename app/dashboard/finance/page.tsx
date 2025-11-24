@@ -216,22 +216,26 @@ export default function DashboardFinancePage() {
                           }}
                           active={active ? 'approved' : 'finished'}
                           onClick={() => openTask(p._id)}
+                          ariaLabel={`Open project ${p.title}`}
+                          // align internal left content to top so amounts/notifier sit under the title
+                          alignTop={true}
                           rightAction={<a onClick={(e:any)=>{ e.stopPropagation(); openTask(p._id); }} style={{ textDecoration: 'none' }}><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, cursor: 'pointer' }}>View</span></a>}
                         >
-                          <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                              <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 16 }}>{`$${total.toLocaleString()}`}</div>
-                              <div style={{ marginTop: 6, display: 'flex', gap: 12 }}>
+                          <div style={{ marginTop: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            {waitingConfirmation ? (
+                              <div style={{ marginRight: 6, display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                                <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block', marginRight: 6 }} />
+                                <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 'clamp(11px,2.2vw,12px)', fontWeight: 700, lineHeight: 1 }}>{'Confirmation pending'}</div>
+                              </div>
+                            ) : <div style={{ minWidth: 0 }} />}
+
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: 'clamp(14px,3.2vw,18px)', lineHeight: 1 }}>{`$${total.toLocaleString()}`}</div>
+                              <div style={{ marginTop: 2, display: 'flex', gap: 8, justifyContent: 'flex-end', fontSize: 'clamp(11px,2vw,13px)' }}>
                                 <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
                                 <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
                               </div>
                             </div>
-                            {waitingConfirmation ? (
-                              <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
-                                <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block', marginRight: 8 }} />
-                                <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: 12, fontWeight: 700 }}>Confirmation pending</div>
-                              </div>
-                            ) : null}
                           </div>
                         </TileCard>
                       );

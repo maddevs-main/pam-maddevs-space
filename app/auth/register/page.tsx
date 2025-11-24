@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../../components/Header';
+import InlineLoader from '../../../components/ui/InlineLoader';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, User, Building, Ticket } from 'lucide-react';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -259,6 +260,7 @@ const PasswordInput: React.FC<Omit<InputProps, 'icon'>> = (props) => {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -282,16 +284,21 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    setLoading(true);
+
     if (password !== confirmPassword) {
       setTempNotification('Passwords do not match.', true);
+      setLoading(false);
       return;
     }
     if (password.length < 6) {
       setTempNotification('Password must be at least 6 characters.', true);
+      setLoading(false);
       return;
     }
     if (!inviteCode) {
       setTempNotification('Invite code is required.', true);
+      setLoading(false);
       return;
     }
 
@@ -304,9 +311,11 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) {
         setTempNotification(data?.message || 'Registration failed', true);
+        setLoading(false);
         return;
       }
       setTempNotification('Registration successful!', false);
+      setLoading(false);
       // clear fields
       setName('');
       setEmail('');
@@ -319,6 +328,7 @@ export default function RegisterPage() {
     } catch (err) {
       console.error(err);
       setTempNotification('Registration failed', true);
+      setLoading(false);
     }
   };
 
@@ -425,7 +435,9 @@ export default function RegisterPage() {
               )}
 
               <FieldWrapper>
-                <SubmitButton type="submit">Register</SubmitButton>
+                <SubmitButton type="submit" disabled={loading} aria-busy={loading} aria-disabled={loading}>
+                  {loading ? <span style={{ display: 'inline-flex', alignItems: 'center' }}><InlineLoader size={18} /></span> : 'Register'}
+                </SubmitButton>
               </FieldWrapper>
               <FieldWrapper>
                 <FooterNote>

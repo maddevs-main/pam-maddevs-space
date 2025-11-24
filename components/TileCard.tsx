@@ -106,14 +106,14 @@ const Inner = styled.div`
   }
 `;
 
-const MainInfo = styled.div`
+const MainInfo = styled.div<{ $alignTop?: boolean }>`
   flex: 1 1 auto;
   margin-bottom: 8px;
   overflow: hidden;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: ${(p:any) => (p.$alignTop ? 'flex-start' : 'center')};
   @media(min-width: 640px) { margin-bottom: 0; }
   @media (max-width: 800px) {
     margin-bottom: 0;
@@ -121,17 +121,20 @@ const MainInfo = styled.div`
 `;
 
 const Title = styled.h3`
-  margin: 0 0 6px 0;
-  font-size: 1.125rem;
+  margin: 0 0 2px 0;
+  font-size: clamp(14px, 2.2vw, 18px);
   font-weight: 600;
   color: #ffffff;
   margin-left: 12px;
   overflow-wrap: anywhere;
   word-break: break-word;
   max-width: 100%;
-  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   @media (max-width: 800px) {
-    font-size: 0.95rem;
+    font-size: clamp(13px, 3.2vw, 16px);
     margin-left: 6px;
   }
 `;
@@ -139,8 +142,8 @@ const Title = styled.h3`
 const MetaRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 18px;
-  font-size: 0.9rem;
+  gap: 8px 12px;
+  font-size: clamp(11px, 1.6vw, 14px);
   color: rgba(255,255,255,0.9);
   align-items: center;
 `;
@@ -166,6 +169,7 @@ const StatusText = styled.span<{ $textColor?: string }>`
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
+  text-transform: uppercase;
 `;
 
 export function statusColors(status?: string) {
@@ -262,6 +266,8 @@ export type TileProps = {
   timeline?: string;
   hideMeta?: boolean;
   ariaLabel?: string;
+  /** align left content to top under the title */
+  alignTop?: boolean;
 };
 
 export default function TileCard(props: TileProps) {
@@ -298,7 +304,7 @@ export default function TileCard(props: TileProps) {
       <Shell>
         <Left>
           <Inner>
-            <MainInfo>
+            <MainInfo $alignTop={props.alignTop}>
               <Title>{title}</Title>
               {/* Timeline row (compact) */}
               {timeline ? <div style={{ marginTop: 6, color: 'rgba(180,180,178,0.75)', fontSize: 13 }}>{timeline}</div> : null}
@@ -321,9 +327,7 @@ export default function TileCard(props: TileProps) {
                       })()
                     }
                   </div>
-                  <div style={{ marginTop: 6, color: 'rgba(180,180,178,0.9)', fontSize: 13 }}>
-                    {props.avgProgress !== undefined ? `${props.avgProgress}% average across ${props.stagesCount || '–'} stages` : `${props.progress}%`}
-                  </div>
+                  {/* text summary removed per design: keep only the visual progress bar */}
                 </div>
               ) : (
                 // fallback to existing children/leftContent for non-project cards
@@ -341,7 +345,7 @@ export default function TileCard(props: TileProps) {
             {props.rightAction ? (
               props.rightAction
             ) : (
-              <StatusText $textColor={textColor} title={String(status || '—')}>{(status || '—').toString()}</StatusText>
+              <StatusText $textColor={textColor} title={String(status || '—')}>View</StatusText>
             )}
           </StatusWrap>
         </Right>

@@ -50,12 +50,9 @@ async function seed() {
   const rs = await db.collection('users').insertOne(staffDoc);
   const rc = await db.collection('users').insertOne(consumerDoc);
 
-  console.log('Inserted new users:');
-  console.log('Admin:', adminEmail, '/', adminPass, 'id:', ra.insertedId.toString());
-  console.log('Staff:', staffEmail, '/', staffPass, 'id:', rs.insertedId.toString());
-  console.log('Consumer:', consumerEmail, '/', consumerPass, 'id:', rc.insertedId.toString());
+
 
   await client.close();
 }
 
-seed().catch(e=>{ console.error('Seeding error', e); process.exit(1); });
+seed().catch(e=>{ process.exit(1); });

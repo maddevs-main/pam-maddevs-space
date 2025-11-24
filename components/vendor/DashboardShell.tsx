@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import Link from 'next/link';
+import { useSidebar } from '../SidebarContext';
 import { Home, FileText, CalendarClock, Users as UsersIcon, CreditCard, Settings, Briefcase, User, ClipboardList, LogOut, MessageSquare, Mail, Compass, BookOpen, Newspaper } from 'lucide-react';
 
 const Shell = styled.div`
@@ -32,6 +33,9 @@ const Sidebar = styled.aside<{ collapsed?: boolean }>`
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
+  @media (max-width: 640px) {
+    display: none;
+  }
 
 `;
 
@@ -83,11 +87,11 @@ const NavButton = styled.div<{ collapsed?: boolean; $active?: boolean; $hovered?
   gap: 12px;
   padding: 0 12px;
   color: black;
-  background: ${(p:any) => (p.$active || p.$hovered) ? 'rgba(242, 0, 0, 0.06)' : 'transparent'};
+  background: ${(p:any) => (p.$active || p.$hovered) ? 'rgba(216, 197, 157, 0.79)' : 'transparent'};
   text-decoration: none;
   font-weight: 700;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: background 120ms ease, color 120ms ease;
   width: 100%;
   justify-content: flex-start;
@@ -106,7 +110,7 @@ const NavButton = styled.div<{ collapsed?: boolean; $active?: boolean; $hovered?
     max-width: 100%;
   }
   &:hover {
-    background: rgba(0,0,0,0.06);
+    background: rgba(216, 194, 140, 0.38);
     color: black;
   }
   ${(p:any) => (p.$active || p.$hovered) ? `svg { transform: scale(1.03); }` : ''}
@@ -193,10 +197,8 @@ export default function DashboardShell({ children, active }: { children: React.R
     else if (pathname === '/dashboard' || pathname === '/') active = 'overview';
   }
 
-  // sidebar collapse state persisted in localStorage
-  const [collapsed, setCollapsed] = React.useState(true);
-  // when collapsed, this controls whether the right-side expander panel is visible
-  const [panelOpen, setPanelOpen] = React.useState(false);
+  // sidebar collapse state is now provided by SidebarContext
+  const { collapsed, panelOpen, mobileOpen, toggleCollapse, setPanelOpen, setMobileOpen } = useSidebar();
 
   useEffect(() => {
     try {
@@ -214,20 +216,7 @@ export default function DashboardShell({ children, active }: { children: React.R
     }
   }
 
-  function toggleCollapse() {
-    // If currently expanded (full sidebar), collapse to icons
-    if (!collapsed) {
-      setCollapsed(true);
-      setPanelOpen(false);
-      try { localStorage.setItem('sidebar_collapsed', '1'); } catch (e) {}
-      return;
-    }
-
-    // If currently collapsed, toggle the panel (two-fold flyer behavior)
-    const nextPanel = !panelOpen;
-    setPanelOpen(nextPanel);
-    try { localStorage.setItem('sidebar_collapsed', '1'); } catch (e) {}
-  }
+  // toggleCollapse is provided by context
 
   // role is derived from NextAuth session via `useSession`
 
@@ -367,6 +356,67 @@ export default function DashboardShell({ children, active }: { children: React.R
                 </a>
               </ExpanderFooter>
         </Expander>
+      ) : null}
+
+      {/* Mobile overlay: show on small screens when mobileOpen is true */}
+      {mobileOpen ? (
+        <>
+          <div onClick={() => setMobileOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50 }} />
+          <div role="dialog" aria-modal="true" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '80%', maxWidth: 360, background: '#d8c0a7ff', zIndex: 60, overflowY: 'auto', padding: 16, boxSizing: 'border-box', boxShadow: '-6px 0 24px rgba(0,0,0,0.32)' }}>
+            {/* close button top-right */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <button onClick={() => setMobileOpen(false)} aria-label="Close menu" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#111', fontSize: 36, padding: 8, lineHeight: 1 }}>✕</button>
+            </div>
+            {/* top spacer to align like Expander */}
+            <div style={{ height: 'var(--sidebar-top-height)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {(() => {
+                const items = (role === 'admin') ? [
+                  { href: '/admin', key: 'overview', label: 'Overview' },
+                  { href: '/admin/users', key: 'users', label: 'Users' },
+                  { href: '/admin/staff', key: 'staff', label: 'Staff' },
+                  { href: '/admin/mail', key: 'mail', label: 'Mail' },
+                  { href: '/admin/projects', key: 'projects-admin', label: 'Projects' },
+                  { href: '/admin/meetings', key: 'meetings-admin', label: 'Meetings' },
+                  { href: '/admin/tasks', key: 'tasks', label: 'Tasks' },
+                  { href: '/admin/onboard', key: 'onboard', label: 'Onboard' },
+                  { href: '/admin/blogs', key: 'blogs', label: 'Blogs' },
+                  { href: '/admin/news', key: 'news', label: 'News' },
+                  { href: '/chat', key: 'chat', label: 'Chat' },
+                  { href: '/admin/finance', key: 'finance-admin', label: 'Finance' },
+                  { href: '/dashboard/settings', key: 'settings', label: 'Settings' },
+                ] : (
+                  role === 'staff' ? [
+                    { href: '/dashboard', key: 'overview', label: 'Overview' },
+                    { href: '/staff/tasks', key: 'tasks', label: 'Tasks' },
+                    { href: '/staff/meetings', key: 'meetings', label: 'Meetings' },
+                    { href: '/chat', key: 'chat', label: 'Chat' },
+                    { href: '/staff/finance', key: 'finance', label: 'Finance' },
+                    { href: '/dashboard/settings', key: 'settings', label: 'Settings' },
+                  ] : [
+                    { href: '/dashboard', key: 'overview', label: 'Overview' },
+                    { href: '/dashboard/projects', key: 'projects', label: 'Projects' },
+                    { href: role === 'staff' ? '/staff/meetings' : '/dashboard/meetings', key: 'meetings', label: 'Meetings' },
+                    { href: '/chat', key: 'chat', label: 'Chat' },
+                    { href: '/dashboard/finance', key: 'finance', label: 'Finance' },
+                    { href: '/dashboard/settings', key: 'settings', label: 'Settings' },
+                  ]
+                );
+
+                return items.map((it) => (
+                  <Link href={it.href} key={`mobile-${it.key}`}>
+                    <div onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', padding: '8px 12px', borderRadius: 6, textDecoration: 'none', color: '#111', background: 'transparent' }}>
+                      <div style={{ marginLeft: 0, fontSize: 48, fontWeight: 900, lineHeight: 1, textAlign: 'left' }}>{it.label}</div>
+                    </div>
+                  </Link>
+                ));
+              })()}
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <button onClick={() => { setMobileOpen(false); handleLogout(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 12px', borderRadius: 6, background: 'rgba(185,28,28,0.04)', color: '#b91c1c', border: 'none', cursor: 'pointer' }}>Logout</button>
+            </div>
+          </div>
+        </>
       ) : null}
 
       <Main>{children}</Main>

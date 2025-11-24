@@ -51,19 +51,9 @@ const { MongoClient } = require('mongodb');
       rows.push(info);
     }
 
-    console.log('Sample users (up to 200):');
     rows.forEach(r => {
-      console.log('---');
-      console.log('id:', r.id);
-      console.log('email:', r.email);
-      console.log('role:', r.role);
-      console.log('type:', r.type);
-      console.log('hash sample:', r.hash);
     });
-    console.log('\nSummary counts:');
-    console.log(counts);
   } catch (e) {
-    console.error('Error detecting hashes:', e);
   } finally {
     await client.close();
   }

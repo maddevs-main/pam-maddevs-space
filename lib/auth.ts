@@ -97,9 +97,6 @@ export function requireAuth(handler: any, roles?: string[]) {
     }
     // Diagnostics for production
     if (process.env.NODE_ENV === 'production') {
-      console.log('[requireAuth] cookies:', req.headers.cookie);
-      console.log('[requireAuth] authorization:', req.headers.authorization);
-      console.log('[requireAuth] resolved token:', t);
     }
     if (!t) return res.status(401).json({ error: 'unauthenticated' });
     const payload = { userId: (t as any).userId || (t as any).sub || null, role: (t as any).role || null, tenantId: (t as any).tenantId || null };

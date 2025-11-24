@@ -10,13 +10,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { db } = await connectToDatabase();
-    console.log('[local-login] attempt for', email);
     const user = await db.collection('users').findOne({ email });
-    console.log('[local-login] user found:', !!user, user?.email, user?.role);
     if (!user) return res.status(401).json({ error: 'invalid_credentials' });
 
     const ok = await bcrypt.compare(password, user.passwordHash || '');
-    console.log('[local-login] password ok:', ok);
     if (!ok) return res.status(401).json({ error: 'invalid_credentials' });
 
     const payload = { id: user._id.toString(), email: user.email, role: user.role, name: user.name, tenantId: user.tenantId || null };

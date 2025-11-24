@@ -2,6 +2,7 @@
 import React from 'react';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { SessionProvider } from 'next-auth/react';
+import { SidebarProvider } from './SidebarContext';
 
 const theme = {
   colors: {
@@ -128,7 +129,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <SessionProvider refetchInterval={60} refetchWhenHidden={false}>
-        {children}
+        <SidebarProvider>
+          {children}
+        </SidebarProvider>
       </SessionProvider>
     </ThemeProvider>
   );

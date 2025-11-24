@@ -10,6 +10,7 @@ import ProjectForm from '../../../components/ProjectForm';
 import { TextInput } from '../../../components/ui/Input';
 import CalendarAction from '../../../components/CalendarAction';
 
+console.log('welcome to pam dashboard by maddevs, access signin or register or dashbaord or something like this');
 export default function AdminFinancePage() {
   const [projects, setProjects] = React.useState<any[]>([]);
   const [staffFin, setStaffFin] = React.useState<any[]>([]);
@@ -168,6 +169,11 @@ export default function AdminFinancePage() {
                 const start = p.timeline?.from ? new Date(p.timeline.from) : null;
                 const end = p.timeline?.to ? new Date(p.timeline.to) : null;
                 const active = start && (!end ? now >= start : (now >= start && now <= end));
+                const waitingConfirmation = Array.isArray(p.milestones) && p.milestones.some((m:any) => m.confirmedByUser && !m.paidByAdmin);
+                const total = Number(p.total_cost ?? p.total ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + (Number(m.amount)||0),0) : 0));
+                const paid = Number(p.paid_amount ?? (p.milestones ? p.milestones.reduce((s:any,m:any)=> s + ((m.paidByAdmin ? (Number(m.amount)||0) : 0)),0) : 0));
+                const pending = Math.max(0, total - paid);
+
                 return (
                   <TileCard
                     key={p._id}
@@ -181,6 +187,24 @@ export default function AdminFinancePage() {
                     }}
                     active={active ? 'approved' : 'finished'}
                     onClick={() => setSelectedProject(p)}
+                    alignTop={true}
+                    leftContent={<div>
+                      {waitingConfirmation ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: 99, background: 'rgba(245,158,11,0.9)', display: 'inline-block' }} />
+                          <div style={{ color: 'rgba(245,158,11,0.95)', fontSize: '12px', fontWeight: 700 }}>Confirmation pending</div>
+                        </div>
+                      ) : (
+                        <div style={{ color: 'rgba(180,180,178,0.9)', fontSize: 13 }}>No confirmation pending</div>
+                      )}
+                    </div>}
+                    children={<div style={{ textAlign: 'right' }}>
+                      <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 800, fontSize: '16px' }}>{`$${total.toLocaleString()}`}</div>
+                      <div style={{ marginTop: 6, display: 'flex', gap: 8, justifyContent: 'flex-end', fontSize: 13 }}>
+                        <div style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700 }}>{`Paid: $${paid.toLocaleString()}`}</div>
+                        <div style={{ color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{`Pending: $${pending.toLocaleString()}`}</div>
+                      </div>
+                    </div>}
                     rightAction={<Button onClick={() => setSelectedProject(p)}>Open</Button>}
                   />
                 );

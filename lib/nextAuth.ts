@@ -6,10 +6,8 @@ import connectToDatabase from './mongodb';
 // Runtime checks: warn in production when critical env vars for cookie auth are missing.
 if (process.env.NODE_ENV === 'production') {
   if (!process.env.NEXTAUTH_URL) {
-    console.warn('[Startup] WARNING: NEXTAUTH_URL is not set. NextAuth cookies and redirects may not behave correctly in production.');
   }
   if (!process.env.COOKIE_DOMAIN) {
-    console.warn('[Startup] WARNING: COOKIE_DOMAIN is not set. Cross-subdomain cookies may not be set correctly without a custom domain (required on Vercel).');
   }
 }
 
@@ -25,14 +23,14 @@ export const authOptions = {
         if (!credentials) return null;
         // Small diagnostics to help debug signin issues in development.
         const debug = process.env.NEXTAUTH_DEBUG || process.env.NODE_ENV === 'development';
-        if (debug) console.log('[NextAuth] authorize called for', credentials.email);
+        if (debug) {}
         const { db } = await connectToDatabase();
-        if (debug) console.log('[NextAuth] connected DB name:', (db && db.databaseName));
+        if (debug) {}
         const user = await db.collection('users').findOne({ email: credentials.email });
-        if (debug) console.log('[NextAuth] user found:', !!user, user && user.email);
+        if (debug) {}
         if (!user) return null;
         const ok = await compare(credentials.password || '', user.passwordHash || '');
-        if (debug) console.log('[NextAuth] password compare result for', credentials.email, ':', ok);
+        if (debug) {}
         if (!ok) return null;
         return { id: user._id.toString(), email: user.email, name: user.name, role: user.role, tenantId: user.tenantId };
       }
@@ -67,10 +65,6 @@ export const authOptions = {
       const debug = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV === 'development';
       if (debug) {
         try {
-          console.log('[NextAuth][jwt] callback called', {
-            user: user ? { email: (user as any).email, role: (user as any).role } : undefined,
-            iat: token.iat, exp: token.exp
-          });
         } catch (err) {
           /* ignore logging errors */
         }
@@ -89,10 +83,6 @@ export const authOptions = {
       const debug = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV === 'development';
       if (debug) {
         try {
-          console.log('[NextAuth][session] callback called', {
-            sessionUser: session.user ? { email: (session.user as any).email, role: (session.user as any).role } : undefined,
-            tokenIat: (token as any).iat, tokenExp: (token as any).exp
-          });
         } catch (err) {
           /* ignore logging errors */
         }

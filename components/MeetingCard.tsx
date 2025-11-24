@@ -32,6 +32,10 @@ const Shell = styled.div`
   min-width: 0;
   overflow-x: hidden;
   overflow-y: hidden;
+  height: 120px; /* fixed card height for consistent layout */
+  @media (max-width: 800px) {
+    height: 110px;
+  }
   @media (max-width: 800px) {
     grid-template-columns: 1fr 70px;
   }
@@ -148,6 +152,7 @@ const StatusText = styled.span`
   padding: 0 6px;
   width: 100%;
   box-sizing: border-box;
+ 
 `;
 
 export function statusColors(status?: string) {
@@ -229,12 +234,12 @@ export default function MeetingCard(props: TileProps) {
           </Inner>
         </Left>
 
-        <Right $shellBg={shellColor}>
+          <Right $shellBg={shellColor}>
           <StatusWrap>
             {props.rightAction ? (
               props.rightAction
             ) : (
-              <StatusText title={String(status || '—')}>{(status || '—').toString()}</StatusText>
+              <StatusText title={String(status || '—')}>View</StatusText>
             )}
           </StatusWrap>
         </Right>

@@ -81,6 +81,61 @@ export default function AdminUsersPage() {
     else { setMessage('User deactivated'); fetchUsers(); }
   }
 
+  async function deleteUser(id: string) {
+    if (!confirm('Delete this user? This cannot be undone.')) return;
+    setMessage(null);
+    try {
+      const res = await fetch('/api/users/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) { setMessage(JSON.stringify(data)); return; }
+      setMessage('User deleted');
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (e) { setMessage('Error deleting user'); }
+  }
+
+  async function deleteUserProjects(userId: string) {
+    if (!confirm("Delete all projects for this user? This cannot be undone.")) return;
+    setMessage(null);
+    try {
+      const res = await fetch('/api/admin/delete-user-projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId }) });
+      const data = await res.json();
+      if (!res.ok) { setMessage(JSON.stringify(data)); return; }
+      setMessage(`Deleted ${data.deletedCount || 0} projects`);
+      setUserProjects(null);
+      fetchUsers();
+    } catch (e) { setMessage('Error deleting projects'); }
+  }
+
+  async function deleteUserAndProjects(userId: string) {
+    if (!confirm('Delete user and all their projects? This action is irreversible.')) return;
+    setMessage(null);
+    try {
+      const res = await fetch('/api/admin/delete-user-and-projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId }) });
+      const data = await res.json();
+      if (!res.ok) { setMessage(JSON.stringify(data)); return; }
+      setMessage(`User deleted (${data.userDeleted || 0}) and ${data.projectsDeleted || 0} projects removed`);
+      setSelectedUser(null);
+      setUserProjects(null);
+      fetchUsers();
+    } catch (e) { setMessage('Error deleting user and projects'); }
+  }
+
+  async function deleteProject(projectId: string) {
+    if (!confirm('Delete this project? This cannot be undone.')) return;
+    setMessage(null);
+    try {
+      const res = await fetch('/api/projects/' + projectId, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) { setMessage(JSON.stringify(data)); return; }
+      setMessage('Project deleted');
+      setSelectedProject(null);
+      // refresh user projects if loaded
+      setUserProjects(null);
+      fetchUsers();
+    } catch (e) { setMessage('Error deleting project'); }
+  }
+
   return (
     <div>
       <h3>Users</h3>
@@ -133,6 +188,9 @@ export default function AdminUsersPage() {
                     <Button onClick={() => promoteUser(selectedUser.id, 'staff')}>Make Staff</Button>
                     <Button onClick={() => promoteUser(selectedUser.id, 'admin')}>Make Admin</Button>
                     <Button onClick={() => deactivateUser(selectedUser.id)} style={{ background: '#7a3030' }}>Deactivate</Button>
+                    <Button onClick={() => deleteUserProjects(selectedUser.id)} style={{ background: '#7a3030' }}>Delete User Projects</Button>
+                    <Button onClick={() => deleteUser(selectedUser.id)} style={{ background: '#7a3030' }}>Delete User</Button>
+                    <Button onClick={() => deleteUserAndProjects(selectedUser.id)} style={{ background: '#7a3030' }}>Delete User & Projects</Button>
                   </div>
                 </div>
               </Card>
@@ -210,7 +268,7 @@ export default function AdminUsersPage() {
           </Dialog>
         ) : null}
         {selectedProject ? (
-          <Dialog title={selectedProject.title} onClose={() => setSelectedProject(null)} footer={<><Button onClick={() => setSelectedProject(null)}>Close</Button></>}>
+          <Dialog title={selectedProject.title} onClose={() => setSelectedProject(null)} footer={<><Button onClick={() => setSelectedProject(null)}>Close</Button><Button style={{ background: '#7a3030', marginLeft: 8 }} onClick={() => deleteProject(selectedProject._id || selectedProject.id)}>Delete Project</Button></>}>
             <div style={{ marginTop: 12 }}>
               <div><strong>Total:</strong> {selectedProject.total_cost}</div>
               <div style={{ marginTop: 8 }}><strong>Objectives:</strong> {(selectedProject.objectives || []).join(', ') || '—'}</div>

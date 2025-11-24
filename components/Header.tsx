@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import styled from 'styled-components';
+import { useSidebar } from './SidebarContext';
 
 const HeaderWrap = styled.header`
   padding: 20px 24px;
@@ -11,6 +12,7 @@ const HeaderWrap = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 `;
 
 const Brand = styled.div`
@@ -27,6 +29,8 @@ const Nav = styled.nav`
   align-items: center;
   gap: 12px;
 `;
+
+/* removed MobileLogo; Brand will remain visible on mobile and hamburger will be positioned on the right */
 
 const UserText = styled.div`
   color: ${(p:any) => (p && p.theme && p.theme.colors && p.theme.colors.mid) || '#B4B4B2'};
@@ -45,6 +49,27 @@ const LogoImg = styled.img`
   height:48px;
   width: auto;
   display: inline-block;
+`;
+
+const MobileHamburger = styled.button`
+  display: none;
+  @media (max-width: 640px) {
+    display: flex;
+  }
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  aspect-ratio: 1 / 1; /* keep square equal to header height */
+  align-items: center;
+  justify-content: center;
+  background: #786143ff;
+  border: none;
+  border-radius: 6px;
+  padding: 0; /* center the svg nicely */
+  cursor: pointer;
+  /* remove rounded corners so it looks edged to the right */
+  border-radius: 0;
 `;
 
 export default function Header({ title, initialUser }: { title?: string; initialUser?: any }) {
@@ -67,6 +92,7 @@ export default function Header({ title, initialUser }: { title?: string; initial
       router.push('/auth/login');
     }
   }
+  const { mobileOpen, setMobileOpen } = useSidebar();
 
   return (
     <HeaderWrap>
@@ -76,9 +102,9 @@ export default function Header({ title, initialUser }: { title?: string; initial
           <span>{title || 'maddevs'}</span>
         </Brand>
       </a>
-      <Nav>
-        <div />
-      </Nav>
+      <MobileHamburger aria-label={mobileOpen ? 'Close sidebar' : 'Open sidebar'} onClick={() => setMobileOpen(!mobileOpen)}>
+        <img src="/hamburger.svg" alt="menu" style={{ width: 40, height: 40, filter: 'brightness(0)', display: 'block' }} />
+      </MobileHamburger>
     </HeaderWrap>
   );
 }

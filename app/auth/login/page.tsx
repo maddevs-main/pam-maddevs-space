@@ -1,8 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Header from '../../../components/Header';
-import dynamic from 'next/dynamic';
-const LoadingScreen = dynamic(() => import('../../../components/LoadingScreen'), { ssr: false });
+import InlineLoader from '../../../components/ui/InlineLoader';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
@@ -267,7 +266,6 @@ export default function LoginPage() {
 
   return (
     <>
-      {loading && <LoadingScreen />}
       <Header title="maddevs" />
       <GlobalStyle />
       <Background>
@@ -316,7 +314,9 @@ export default function LoginPage() {
               )}
 
               <FieldWrapper>
-                <SubmitButton type="submit" disabled={loading}>{'Sign In'}</SubmitButton>
+                <SubmitButton type="submit" disabled={loading} aria-busy={loading} aria-disabled={loading}>
+                  {loading ? <InlineLoader size={18} /> : 'Sign In'}
+                </SubmitButton>
               </FieldWrapper>
 
               <FieldWrapper>

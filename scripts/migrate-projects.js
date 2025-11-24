@@ -12,7 +12,6 @@ async function migrate() {
     await client.connect();
     const db = client.db();
     const consumers = await db.collection('users').find({ role: 'consumer', projects: { $exists: true, $ne: [] } }).toArray();
-    console.log('Found', consumers.length, 'consumers with embedded projects');
 
     for (const c of consumers) {
       const projects = c.projects || [];
@@ -23,17 +22,13 @@ async function migrate() {
         project.created_at = project.created_at ? new Date(project.created_at) : new Date();
         project.updated_at = new Date();
         const res = await db.collection('projects').insertOne(project);
-        console.log('Migrated project', project.title, '->', res.insertedId.toString());
       }
 
       // remove projects from consumer document
       await db.collection('users').updateOne({ _id: c._id }, { $unset: { projects: '' } });
-      console.log('Cleared projects for consumer', c.email);
     }
 
-    console.log('Migration complete');
   } catch (err) {
-    console.error('Migration error', err);
   } finally {
     await client.close();
   }

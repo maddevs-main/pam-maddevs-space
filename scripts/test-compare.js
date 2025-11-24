@@ -17,16 +17,14 @@ const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 (async () => {
   const uri = process.env.MONGODB_URI;
-  if (!uri) return console.error('MONGODB_URI not set');
+  if (!uri) return;
   const client = new MongoClient(uri);
   try {
     await client.connect();
     const db = client.db();
     const user = await db.collection('users').findOne({ email: 'admin@pam.test' });
-    if (!user) return console.error('admin user not found');
-    console.log('Found admin. passwordHash length:', (user.passwordHash || '').length);
+    if (!user) return;
     const ok = await bcrypt.compare('adminpass', user.passwordHash || '');
-    console.log('bcrypt.compare(adminpass) =>', ok);
-  } catch (e) { console.error('ERR', e); }
+  } catch (e) { }
   finally { await client.close(); }
 })();

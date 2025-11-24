@@ -22,12 +22,12 @@ const { MongoClient } = require('mongodb');
     const dbName = process.env.MONGODB_DB;
     const db = dbName ? client.db(dbName) : client.db();
     const emails = process.argv.slice(2);
-    if (!emails.length) { console.error('Usage: node scripts/check-new-users.js email1 email2 ...'); process.exit(1); }
+    if (!emails.length) { process.exit(1); }
     for (const e of emails) {
       const u = await db.collection('users').findOne({ email: e });
-      if (!u) console.log('MISSING:', e);
-      else console.log('FOUND:', e, 'id:', u._id.toString(), 'role:', u.role, 'hasHash:', !!u.passwordHash);
+      if (!u) {}
+      else {}
     }
-  } catch (e) { console.error('ERR', e); }
+  } catch (e) { }
   finally { await client.close(); }
 })();

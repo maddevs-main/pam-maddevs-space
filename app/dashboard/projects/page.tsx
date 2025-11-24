@@ -72,7 +72,7 @@ function CreateProjectButton({ onCreated }: { onCreated?: () => void }) {
   );
 }
 
-function HeaderActions({ onCreated }: { onCreated?: () => void }) {
+function HeaderActions({ onCreated, showCalendar = true }: { onCreated?: () => void; showCalendar?: boolean }) {
   const [projects, setProjects] = React.useState<any[]>([]);
   React.useEffect(() => {
     let mounted = true;
@@ -92,7 +92,7 @@ function HeaderActions({ onCreated }: { onCreated?: () => void }) {
 
   return (
     <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-      <CalendarAction items={calItems as any} title="Projects calendar" />
+      {showCalendar !== false ? <CalendarAction items={calItems as any} title="Projects calendar" /> : null}
       <div style={{ display: 'flex', alignItems: 'center' }}><CreateProjectButton onCreated={onCreated} /></div>
     </div>
   );

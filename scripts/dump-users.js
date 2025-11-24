@@ -14,7 +14,6 @@ if (fs.existsSync(envPath)) {
 
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
-  console.error('MONGODB_URI not set in environment (.env.local)');
   process.exit(1);
 }
 
@@ -24,10 +23,8 @@ async function run() {
     await client.connect();
     const db = client.db();
     const users = await db.collection('users').find({}, { projection: { passwordHash: 0 } }).toArray();
-    console.log('Found users:', users.length);
-    users.forEach(u => console.log(JSON.stringify(u, null, 2)));
+    users.forEach(u => {});
   } catch (err) {
-    console.error('Error reading users', err);
     process.exit(2);
   } finally {
     await client.close();

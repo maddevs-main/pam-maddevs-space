@@ -32,9 +32,6 @@ const bcrypt = require('bcrypt');
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  console.error('Error: MONGODB_URI environment variable not set.');
-  console.error('Please create a .env.local file and add the following line:');
-  console.error('MONGODB_URI must be set to your live cluster URI.');
   process.exit(1);
 }
 
@@ -44,7 +41,6 @@ async function seed() {
     await client.connect();
     const db = client.db();
 
-    console.log('Connected to', MONGODB_URI);
 
     // Clear existing demo users with same demo emails to be idempotent
     await db.collection('users').deleteMany({ email: { $in: ['admin@pam.test','staff@pam.test','consumer@pam.test'] } });
@@ -109,9 +105,7 @@ async function seed() {
     const resultStaff = await db.collection('users').insertOne(staff);
     const resultConsumer = await db.collection('users').insertOne(consumer);
 
-    console.log('Inserted admin id:', resultAdmin.insertedId.toString());
-    console.log('Inserted staff id:', resultStaff.insertedId.toString());
-    console.log('Inserted consumer id:', resultConsumer.insertedId.toString());
+
 
     // Create a demo invite for testing registration flows (admin-generated style)
     await db.collection('invites').insertOne({
@@ -123,7 +117,6 @@ async function seed() {
       used: false,
     });
 
-    console.log('Demo invite code: demo-invite-001');
 
     // ALSO: create a top-level project document, a task and a meeting tied to them
     try {
@@ -147,7 +140,6 @@ async function seed() {
       };
 
       const resProj = await db.collection('projects').insertOne(projectDoc);
-      console.log('Inserted demo project id:', resProj.insertedId.toString());
 
       const taskDoc = {
         title: 'Demo Task for project',
@@ -163,7 +155,6 @@ async function seed() {
       };
 
       const resTask = await db.collection('tasks').insertOne(taskDoc);
-      console.log('Inserted demo task id:', resTask.insertedId.toString());
 
       const meetingDoc = {
         title: 'Demo Discovery Meeting',
@@ -178,18 +169,13 @@ async function seed() {
       };
 
       const resMeeting = await db.collection('meetings').insertOne(meetingDoc);
-      console.log('Inserted demo meeting id:', resMeeting.insertedId.toString());
     } catch (e) {
       console.warn('Failed to insert demo project/task/meeting', e);
     }
 
-    console.log('\nDemo seeding complete. Credentials:');
-    console.log('Admin:   admin@pam.test / adminpass');
-    console.log('Staff:   staff@pam.test / staffpass');
-    console.log('Consumer: consumer@pam.test / consumerpass');
+
 
   } catch (err) {
-    console.error('Seeding error', err);
   } finally {
     await client.close();
   }
