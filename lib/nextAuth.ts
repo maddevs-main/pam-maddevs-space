@@ -64,6 +64,17 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev_nextauth_secret',
   callbacks: {
     async jwt({ token, user }) {
+      const debug = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV === 'development';
+      if (debug) {
+        try {
+          console.log('[NextAuth][jwt] callback called', {
+            user: user ? { email: (user as any).email, role: (user as any).role } : undefined,
+            iat: token.iat, exp: token.exp
+          });
+        } catch (err) {
+          /* ignore logging errors */
+        }
+      }
       // Always sync user fields on sign in or token refresh
       if (user) {
         token.userId = (user as any).id;
@@ -75,6 +86,17 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
+      const debug = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV === 'development';
+      if (debug) {
+        try {
+          console.log('[NextAuth][session] callback called', {
+            sessionUser: session.user ? { email: (session.user as any).email, role: (session.user as any).role } : undefined,
+            tokenIat: (token as any).iat, tokenExp: (token as any).exp
+          });
+        } catch (err) {
+          /* ignore logging errors */
+        }
+      }
       if (session.user) {
         (session.user as any).id = (token as any).userId;
         (session.user as any).role = (token as any).role;
