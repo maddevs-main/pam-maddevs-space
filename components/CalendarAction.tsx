@@ -34,6 +34,63 @@ const SyncDark = styled(IconButton)`
   border: 1px solid rgba(255,255,255,0.06);
 `;
 
+const InlineCalendarContent = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+`;
+
+const InlineCalendarPane = styled.div`
+  flex: 0 0 auto;
+  width: 320px;
+  max-width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+`;
+
+const InlineListPane = styled.div`
+  min-width: 260px;
+  flex: 1 1 260px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const ItemsScroll = styled.div`
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+  width: 100%;
+`;
+
+const SyncRow = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+
+  ${SyncPrimary}, ${SyncDark} {
+    flex: 1 1 200px;
+    justify-content: center;
+  }
+
+  @media (max-width: 640px) {
+    ${SyncPrimary}, ${SyncDark} {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+  }
+`;
+
 function CalendarPoints({ marks }: { marks: Array<{ date: string; color?: string }> }) {
   // filter out empty/invalid dates to avoid `new Date('')` -> Invalid Date
   const validMarks = React.useMemo(() => (marks || []).filter(m => {
@@ -271,20 +328,20 @@ export default function CalendarAction({ items = [], title = 'Calendar', inline 
 
   // Build the inner content (used for dialog and inline rendering)
   const innerContent = (
-    <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      <div>
+    <InlineCalendarContent>
+      <InlineCalendarPane>
         {meetingsOnly ? (
           <CalendarPoints marks={items.filter(Boolean).map(it => ({ date: it.from || it.to || '', color: it.color }))} />
         ) : (
           <CalendarSpan from={selectedFrom || undefined} to={selectedTo || undefined} />
         )}
-      </div>
+      </InlineCalendarPane>
 
-      <div style={{ minWidth: 260, flex: '1 1 220px' }}>
+      <InlineListPane>
         <h4 style={{ margin: '0 0 8px 0', color: '#f8f8f8' }}>Items</h4>
-        <div style={{ display: 'grid', gap: 8, maxHeight: 360, overflow: 'auto' }}>
+        <ItemsScroll>
           {items.length === 0 ? <div style={{ color: 'rgba(180,180,178,0.9)' }}>No items</div> : items.map(it => (
-            <button key={it.id} onClick={() => onSelectItem(it)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '8px 10px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.03)', cursor: 'pointer', color: '#f8f8f8' }}>
+            <button key={it.id} onClick={() => onSelectItem(it)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '8px 10px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.03)', cursor: 'pointer', color: '#f8f8f8', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span aria-hidden style={{ width: 12, height: 12, borderRadius: 4, background: it.color || '#999' }} />
                 <div style={{ fontWeight: 700 }}>{it.title}</div>
@@ -292,10 +349,10 @@ export default function CalendarAction({ items = [], title = 'Calendar', inline 
               <div style={{ color: 'rgba(180,180,178,0.85)', fontSize: 13 }}>{fmtRange(it)}</div>
             </button>
           ))}
-        </div>
+        </ItemsScroll>
         <div style={{ marginTop: 12 }}>
           <div style={{ marginBottom: 8, color: 'rgba(180,180,178,0.9)' }}>Sync</div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <SyncRow>
             <SyncPrimary onClick={() => openGoogleEvents(items)} title="Add to Google Calendar" aria-label="Add to Google Calendar">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="2" y="3" width="20" height="18" rx="2" fill="#ffffff" stroke="#e6e6e6" />
@@ -317,10 +374,10 @@ export default function CalendarAction({ items = [], title = 'Calendar', inline 
               </svg>
               <span style={{ marginLeft: 6 }}>Add to Apple Calendar</span>
             </SyncDark>
-          </div>
+          </SyncRow>
         </div>
-      </div>
-    </div>
+      </InlineListPane>
+    </InlineCalendarContent>
   );
 
   // If inline is requested, render the inner content directly (no dialog, no icon)

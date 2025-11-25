@@ -12,6 +12,49 @@ import CalendarAction from '../../../components/CalendarAction';
 import styled from 'styled-components';
 import Dialog from '../../../components/ui/Dialog';
 
+const ActionsWrap = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+`;
+
+const ActionSlot = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    align-items: stretch;
+    justify-content: flex-start;
+    > * {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+`;
+
+const ActionButtonText = styled.span`
+  pointer-events: none;
+  flex: 1;
+  min-width: 0;
+  text-align: inherit;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+`;
+
 export default function ProjectsPage() {
   const [refreshKey, setRefreshKey] = React.useState(0);
 
@@ -50,18 +93,28 @@ function CreateProjectButton({ onCreated }: { onCreated?: () => void }) {
       &:hover { background: var(--color-yes); transform: translateY(-2px); }
     &:active { transform: translateY(0); }
     &:focus-visible { outline: 3px solid rgba(255,255,255,0.06); outline-offset: 3px; }
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+    flex-wrap: wrap;
+    text-align: left;
+    @media (max-width: 640px) {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
   `;
 
   return (
     <>
       <SquarePlus aria-label="Create project request" title="Create project request" onClick={() => setOpen(true)}>
-        <span aria-hidden style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 34, width: 34 }}>
+        <span aria-hidden style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 34, width: 34, flex: '0 0 auto' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <line x1="12" y1="5" x2="12" y2="19" stroke="#000" strokeWidth="2" strokeLinecap="round" />
             <line x1="5" y1="12" x2="19" y2="12" stroke="#000" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </span>
-        <span style={{ pointerEvents: 'none' }}>Create a project request</span>
+        <ActionButtonText>Create a project request</ActionButtonText>
       </SquarePlus>
       {open ? (
         <Dialog title="Create a project request" onClose={() => setOpen(false)} borderColor={'rgba(44, 44, 44, 0.85)'}>
@@ -91,10 +144,16 @@ function HeaderActions({ onCreated, showCalendar = true }: { onCreated?: () => v
   const calItems = projects.map(p => ({ id: String(p._id || p.id), title: p.title || 'Project', from: p.timeline?.from || p.createdAt || null, to: p.timeline?.to || p.timeline?.from || null, color: 'rgb(59,130,246)', type: 'project' }));
 
   return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-      {showCalendar !== false ? <CalendarAction items={calItems as any} title="Projects calendar" /> : null}
-      <div style={{ display: 'flex', alignItems: 'center' }}><CreateProjectButton onCreated={onCreated} /></div>
-    </div>
+    <ActionsWrap>
+      {showCalendar !== false ? (
+        <ActionSlot>
+          <CalendarAction items={calItems as any} title="Projects calendar" />
+        </ActionSlot>
+      ) : null}
+      <ActionSlot>
+        <CreateProjectButton onCreated={onCreated} />
+      </ActionSlot>
+    </ActionsWrap>
   );
 }
 

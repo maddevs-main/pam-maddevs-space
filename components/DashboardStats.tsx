@@ -306,6 +306,21 @@ const FinanceMetricCard = styled(MetricCard)`
   }
 `;
 
+const MeetingsSection = styled.div`
+  background: rgba(2, 6, 23, 0.45);
+  border: 1px solid rgba(248,248,248,0.05);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+`;
+
+const SectionTitle = styled.h4`
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8f8f8;
+`;
+
 // Move all logic into the DashboardStats function
 function DashboardStats({ data, currentUser }) {
   // Helper to filter tasks for user
@@ -382,6 +397,15 @@ function DashboardStats({ data, currentUser }) {
   const activeStagesCount = data?.projects?.activeStages ?? 3;
   const activeProjectScore = data?.projects?.activeScore ?? 74;
   // default stages: prefer selected project's stages, else use top project's stages, else fallback sample
+  function calcAverageProgress(project?: any) {
+    if (!project) return 0;
+    const stages = Array.isArray(project.stages) ? project.stages : [];
+    if (!stages.length) return 0;
+    const total = stages.reduce((sum: number, stage: any) => sum + Number(stage?.progress || 0), 0);
+    return Math.round(total / stages.length);
+  }
+  const progressBarAvg = selectedProject ? calcAverageProgress(selectedProject) : topProjectAvg;
+
   const fallbackStages = [
     { name: 'Discovery', desc: 'Requirements & kickoff', progress: 100 },
     { name: 'Design', desc: 'Wireframes & mockups', progress: 65 },
@@ -438,26 +462,28 @@ function DashboardStats({ data, currentUser }) {
             </div>
 
             <MeetingsBox>
-              <h3 style={{ margin: 0, color: '#f8f8f8' }}>Upcoming Meetings</h3>
-              <Small style={{ marginTop: 6 }}>Next scheduled</Small>
-              <div style={{ height: 12 }} />
-              <div style={{ overflow: 'auto' }}>
-                {meetings.map((m:any) => (
-                  <div key={m.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <div style={{ fontWeight: 700, color: '#f8f8f8' }}>{m.title}</div>
-                      <Small>{m.time}</Small>
+              <MeetingsSection style={{ marginTop: 0 }}>
+                <SectionTitle>Upcoming Meetings</SectionTitle>
+                <Small style={{ marginTop: 6 }}>Next scheduled</Small>
+                <div style={{ height: 12 }} />
+                <div style={{ overflow: 'auto' }}>
+                  {meetings.map((m:any) => (
+                    <div key={m.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div style={{ fontWeight: 700, color: '#f8f8f8' }}>{m.title}</div>
+                        <Small>{m.time}</Small>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {meetings.length === 0 && <Small>No upcoming meetings</Small>}
-              </div>
+                  ))}
+                  {meetings.length === 0 && <Small>No upcoming meetings</Small>}
+                </div>
+              </MeetingsSection>
 
               {/* Active projects mini list */}
-              <div style={{ marginTop: 12 }}>
-                <h4 style={{ margin: '8px 0', color: '#f8f8f8', fontSize: 14 }}>Active Projects</h4>
+              <MeetingsSection>
+                <SectionTitle>Active Projects</SectionTitle>
                 {activeProjectsList.length === 0 ? <Small>No active projects</Small> : (
-                  <div style={{ display: 'grid', gap: 8, marginTop: 6 }}>
+                  <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
                     {activeProjectsList.map((p:any) => {
                       const pid = String(p._id || p.id);
                       const isSel = String(selectedProjectId) === pid;
@@ -472,7 +498,7 @@ function DashboardStats({ data, currentUser }) {
                     })}
                   </div>
                 )}
-              </div>
+              </MeetingsSection>
             </MeetingsBox>
           </FrameGrid>
         </Frame>
@@ -483,10 +509,17 @@ function DashboardStats({ data, currentUser }) {
         <h3 style={{ margin: 0, color: '#f8f8f8' }}>{isStaff ? 'Tasks' : 'Projects'}</h3>
         <Small style={{ marginTop: 6, fontSize: 14 }}>Stages & progress</Small>
         <div style={{ height: 12 }} />
-          <div style={{ marginBottom: 12 }}>
-          <Small>{isStaff ? 'Top task avg' : 'Top project avg'}</Small>
+        <div style={{ marginBottom: 12 }}>
+          {(() => {
+            const label = selectedProject
+              ? (isStaff ? 'Selected task avg' : 'Selected project avg')
+              : (isStaff ? 'Top task avg' : 'Top project avg');
+            return <Small>{label}</Small>;
+          })()}
           <div style={{ height: 8 }} />
-          <Bar style={{ height: 18 }}><BarFill w={topProjectAvg} color={RGB_STAGE_TOP_GREEN} /></Bar>
+          <Bar style={{ height: 18 }}>
+            <BarFill w={progressBarAvg} color={RGB_STAGE_TOP_GREEN} />
+          </Bar>
         </div>
 
         {displayStages.map((s:any, i:number) => (
@@ -505,7 +538,9 @@ function DashboardStats({ data, currentUser }) {
       {/* Finance stats card spanning one column */}
       <FinanceMetricCard>
         <h3 style={{ margin: 0, color: '#f8f8f8' }}>Finance</h3>
-        <MetricLabel>Total Paid</MetricLabel>
+        <MetricLabel style={{ marginTop: 6 }}>Total</MetricLabel>
+        <BigNumber>{'$' + total.toLocaleString()}</BigNumber>
+        <MetricLabel style={{ marginTop: 12 }}>Total Paid</MetricLabel>
         <BigNumber>{'$' + paid.toLocaleString()}</BigNumber>
         <MetricLabel style={{ marginTop: 12 }}>Total Pending</MetricLabel>
         <BigNumber style={{ color: '#eab308' }}>{'$' + pending.toLocaleString()}</BigNumber>

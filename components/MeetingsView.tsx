@@ -57,6 +57,16 @@ const SquarePlus = styled.button`
   &:hover { background: rgba(var(--color-yes-rgb),0.90); transform: translateY(-2px); }
   &:active { transform: translateY(0); }
   &:focus-visible { outline: 3px solid rgba(255,255,255,0.06); outline-offset: 3px; }
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+  white-space: normal;
+  text-align: left;
+  @media (max-width: 640px) {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
 `;
 
 const FooterNeutral = styled(SquarePlus)`
@@ -82,6 +92,48 @@ const FooterPrimary = styled(SquarePlus)`
   font-size: 14px;
   gap: 10px;
   &:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
+`;
+
+const ActionsWrap = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+`;
+
+const ActionSlot = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    align-items: stretch;
+    justify-content: flex-start;
+    > * {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+`;
+
+const ActionButtonText = styled.span`
+  flex: 1;
+  min-width: 0;
+  text-align: inherit;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
 export default function MeetingsView() {
@@ -215,15 +267,22 @@ export default function MeetingsView() {
     });
 
     return (
-      <PageShell title="Meetings" subtitle="Request and review meetings." actions={<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><CalendarAction items={calItems} title="Meetings calendar" /><SquarePlus onClick={() => setOpen(true)} title="Request a meeting" aria-label="Request a meeting">
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 34, width: 34 }} aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="12" y1="5" x2="12" y2="19" stroke="#000" strokeWidth="2" strokeLinecap="round" />
-            <line x1="5" y1="12" x2="19" y2="12" stroke="#000" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </span>
-        Request a meeting
-      </SquarePlus></div>}>
+      <PageShell title="Meetings" subtitle="Request and review meetings." actions={<ActionsWrap>
+        <ActionSlot>
+          <CalendarAction items={calItems} title="Meetings calendar" />
+        </ActionSlot>
+        <ActionSlot>
+          <SquarePlus onClick={() => setOpen(true)} title="Request a meeting" aria-label="Request a meeting">
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 34, width: 34, flex: '0 0 auto' }} aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="5" x2="12" y2="19" stroke="#000" strokeWidth="2" strokeLinecap="round" />
+                <line x1="5" y1="12" x2="19" y2="12" stroke="#000" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </span>
+            <ActionButtonText>Request a meeting</ActionButtonText>
+          </SquarePlus>
+        </ActionSlot>
+      </ActionsWrap>}>
         <div>
 
       {open ? (

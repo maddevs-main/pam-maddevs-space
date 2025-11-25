@@ -43,12 +43,18 @@ const HeroGrid = styled.div`
 
 const RightGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   gap: 24px;
   align-items: start;
+  width: 100%;
+  min-width: 0;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 600px) {
+    gap: 16px;
   }
 `;
 
@@ -63,6 +69,18 @@ const VisualPanel = styled.div`
   color: rgba(200,200,198,0.9);
   font-weight: 700;
   font-size: 14px;
+`;
+
+const DetailBody = styled.div`
+  min-height: 80vh;
+  padding: 24px;
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 640px) {
+    padding: 16px 10px 24px;
+  }
 `;
 
 export default function ProjectDetailsClient({ projectId, initialProject }: { projectId: string, initialProject?: any }) {
@@ -188,15 +206,15 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
       <PageShell
       title={project.title}
       preTitle={<BackButton onClick={() => router.push('/dashboard/projects')}>← Back</BackButton>}
-      actions={<div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><StatusPill panelColor={statusColor}><span style={{ width: 10, height: 10, borderRadius: 999, background: '#06201a', boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.06)' }} aria-hidden="true" />{statusText.toUpperCase()}</StatusPill><Button onClick={() => fetchProject()} style={{ padding: '8px 12px' }}>Refresh</Button></div>}
+      actions={<div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', minWidth: 0 }}><StatusPill panelColor={statusColor}><span style={{ width: 10, height: 10, borderRadius: 999, background: '#06201a', boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.06)' }} aria-hidden="true" />{statusText.toUpperCase()}</StatusPill><Button onClick={() => fetchProject()} style={{ padding: '8px 12px' }}>Refresh</Button></div>}
     >
-      <div style={{ minHeight: '80vh', padding: 24, background: 'transparent' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+      <DetailBody>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, minWidth: 0 }}>
         <RightGrid>
-          <div style={{ display: 'grid', gap: 24 }}>
+          <div style={{ display: 'grid', gap: 24, minWidth: 0 }}>
             <Card classic>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Project Overview</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
                 <div>
                   <h3 style={{ margin: '0 0 8px 0', color: 'rgba(200,200,198,0.9)' }}>Description</h3>
                   <div style={{ color: 'rgba(180,180,178,0.9)' }}>{project.description}</div>
@@ -210,10 +228,10 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
 
             <Card classic>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Status</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ color: 'rgba(180,180,178,0.9)', width: 150 }}>Progress</span>
-                  <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <span style={{ color: 'rgba(180,180,178,0.9)', width: 150, flex: '0 1 150px', minWidth: 0 }}>Progress</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ height: 8, background: 'rgba(0,0,0,0.3)', borderRadius: 999, overflow: 'hidden' }}>
                       <div style={{ height: 8, background: meanTrack, borderRadius: 999, overflow: 'hidden' }}>
                         <div style={{ height: 8, borderRadius: 999, background: meanFill, width: `${clampedMean}%`, transition: 'width 280ms ease' }} />
@@ -278,9 +296,9 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
 
             <Card classic>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Links</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <h3 style={{ margin: '0 0 8px 0', color: 'rgba(200,200,198,0.9)' }}>Filebase</h3>
                     <Button onClick={() => { setAddingLinkValue(''); setAddingMessage(null); setShowAddFilebase(true); }} style={{ padding: '6px 10px' }}>Add</Button>
                   </div>
@@ -289,7 +307,7 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
                   </div>
                 </div>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <h3 style={{ margin: '0 0 8px 0', color: 'rgba(200,200,198,0.9)' }}>Credential</h3>
                     <Button onClick={() => { setAddingLinkValue(''); setAddingMessage(null); setShowAddCredential(true); }} style={{ padding: '6px 10px' }}>Add</Button>
                   </div>
@@ -298,7 +316,7 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
                   </div>
                 </div>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <h3 style={{ margin: '0 0 8px 0', color: 'rgba(200,200,198,0.9)' }}>Other</h3>
                     <Button onClick={() => { setAddingLinkValue(''); setAddingMessage(null); setShowAddOther(true); }} style={{ padding: '6px 10px' }}>Add</Button>
                   </div>
@@ -382,10 +400,10 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
             ) : null}
           </div>
 
-          <div>
+          <div style={{ minWidth: 0 }}>
             <Card classic style={{ marginBottom: 12 }}>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Timeline</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 <CalendarAction inline items={calItems} title="Timeline" />
               </div>
             </Card>
@@ -406,8 +424,8 @@ export default function ProjectDetailsClient({ projectId, initialProject }: { pr
 
           </div>
         </RightGrid>
-      </div>
-    </div>
+        </div>
+      </DetailBody>
     </PageShell>
   );
 }

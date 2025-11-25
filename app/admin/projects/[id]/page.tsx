@@ -13,12 +13,18 @@ import ProjectForm from '../../../../components/ProjectForm';
 
 const RightGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   gap: 24px;
   align-items: start;
+  width: 100%;
+  min-width: 0;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 600px) {
+    gap: 16px;
   }
 `;
 
@@ -39,6 +45,18 @@ const PlusButton = styled.button`
   &:hover { transform: translateY(-4px) scale(1.02); }
   &:active { transform: translateY(-1px) scale(0.99); }
   &:focus-visible { outline: 3px solid rgba(96,165,250,0.3); outline-offset: 4px; }
+`;
+
+const DetailBody = styled.div`
+  min-height: 80vh;
+  padding: 24px;
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 640px) {
+    padding: 16px 10px 24px;
+  }
 `;
 
 export default function AdminProjectDetail({ params }: { params: any }) {
@@ -182,20 +200,20 @@ function AdminProject({ id }: { id: string }) {
     <PageShell
       title={project.title}
       preTitle={<BackButton onClick={() => router.push('/admin/projects')}>← Back</BackButton>}
-      actions={<div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      actions={<div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', minWidth: 0 }}>
         <CalendarAction items={[{ id: String(project._id), title: project.title, from: project.timeline?.from || null, to: project.timeline?.to || null, color: 'rgb(59,130,246)', type: 'project' }, ...(meetings.map(m=>({ id: String(m._id||m.id), title: m.title, from: m.scheduledAt||null, to: m.scheduledAt||null, color: 'rgb(249,115,22)', type: 'meeting' })))]} title="Project calendar" />
         <StatusPill panelColor={statusColor}><span style={{ width: 10, height: 10, borderRadius: 999, background: '#06201a', boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.06)' }} aria-hidden="true" />{statusText.toUpperCase()}</StatusPill>
         <Button onClick={() => fetchProject()} style={{ padding: '8px 12px' }}>Refresh</Button>
         <Button onClick={() => setEditOpen(true)} style={{ padding: '8px 12px' }}>Edit</Button>
       </div>}
     >
-      <div style={{ minHeight: '80vh', padding: 24, background: 'transparent' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+      <DetailBody>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, minWidth: 0 }}>
         <RightGrid>
-          <div style={{ display: 'grid', gap: 24 }}>
+          <div style={{ display: 'grid', gap: 24, minWidth: 0 }}>
             <Card classic>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Project Overview</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
                 <div>
                   <h3 style={{ margin: '0 0 8px 0', color: 'rgba(200,200,198,0.9)' }}>Description</h3>
                   <div style={{ color: 'rgba(180,180,178,0.9)' }}>{project.description}</div>
@@ -209,10 +227,10 @@ function AdminProject({ id }: { id: string }) {
 
             <Card classic>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Status</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ color: 'rgba(180,180,178,0.9)', width: 150 }}>Average per stage</span>
-                  <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <span style={{ color: 'rgba(180,180,178,0.9)', width: 150, flex: '0 1 150px', minWidth: 0 }}>Average per stage</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ height: 8, background: 'rgba(0,0,0,0.3)', borderRadius: 999, overflow: 'hidden' }}>
                       <div style={{ height: 8, background: meanTrack, borderRadius: 999, overflow: 'hidden' }}>
                         <div style={{ height: 8, borderRadius: 999, background: meanFill, width: `${clampedMean}%`, transition: 'width 280ms ease' }} />
@@ -279,7 +297,7 @@ function AdminProject({ id }: { id: string }) {
 
             <Card classic>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Links</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 <div>
                   <h3 style={{ margin: '0 0 8px 0', color: 'rgba(200,200,198,0.9)' }}>Filebase</h3>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -302,10 +320,10 @@ function AdminProject({ id }: { id: string }) {
             </Card>
           </div>
 
-          <div>
+          <div style={{ minWidth: 0 }}>
             <Card classic style={{ marginBottom: 12 }}>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 20 }}>Timeline</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 <CalendarAction inline items={calItems} title="Timeline" />
               </div>
             </Card>
@@ -359,10 +377,8 @@ function AdminProject({ id }: { id: string }) {
             ) : null}
           </div>
         </RightGrid>
-      </div>
-    </div>
+        </div>
+      </DetailBody>
     </PageShell>
   );
 }
-
-

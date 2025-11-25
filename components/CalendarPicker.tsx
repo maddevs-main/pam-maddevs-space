@@ -70,7 +70,7 @@ export default function CalendarPicker({
   }
 
   return (
-    <div style={{ width: 320, background: 'rgba(15,15,17,0.96)', border: '1px solid rgba(255,255,255,0.04)', padding: 12, borderRadius: 10, color: '#f1f1f1' }}>
+    <div style={{ width: 320, maxWidth: '100%', background: 'rgba(15,15,17,0.96)', border: '1px solid rgba(255,255,255,0.04)', padding: 12, borderRadius: 10, color: '#f1f1f1', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <button onClick={handlePrev} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }} aria-label="Previous month">‹</button>
         <div style={{ fontWeight: 800 }}>{month.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>

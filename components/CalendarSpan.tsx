@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import styled from 'styled-components';
 import CalendarPicker from './CalendarPicker';
 
 function fullDateLabel(d?: string) {
@@ -9,6 +10,29 @@ function fullDateLabel(d?: string) {
     return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   } catch (e) { return d; }
 }
+
+const SpanWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 16px;
+  }
+`;
+
+const SpanContent = styled.div`
+  width: 320px;
+  max-width: 100%;
+  margin: 0 auto;
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+`;
 
 export default function CalendarSpan({ from, to }: { from?: string | null; to?: string | null }) {
   const fromDate = from ? new Date(from) : null;
@@ -21,8 +45,8 @@ export default function CalendarSpan({ from, to }: { from?: string | null; to?: 
   React.useEffect(() => { setSelFrom(from || null); setSelTo(to || null); }, [from, to]);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <div style={{ minWidth: 140 }}>
+    <SpanWrapper>
+      <SpanContent>
         <div style={{ fontSize: 13, color: 'rgba(180,180,178,0.9)', fontWeight: 700 }}>{fullDateLabel(selFrom || undefined)} — {fullDateLabel(selTo || undefined)}</div>
         <div style={{ marginTop: 8 }}>
           <div style={{ width: '100%', height: 72, borderRadius: 10, background: 'rgba(255,255,255,0.02)', padding: 8, boxSizing: 'border-box', border: '1px solid rgba(180,180,178,0.04)' }}>
@@ -56,7 +80,7 @@ export default function CalendarSpan({ from, to }: { from?: string | null; to?: 
                 <CalendarPicker from={selFrom} to={selTo} readOnly={true} onChange={(f,t) => { setSelFrom(f||null); setSelTo(t||null); }} />
               </div>
         </div>
-      </div>
-    </div>
+      </SpanContent>
+    </SpanWrapper>
   );
 }
